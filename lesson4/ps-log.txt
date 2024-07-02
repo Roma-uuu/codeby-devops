@@ -1,0 +1,150 @@
+Script started on 2024-07-01 21:33:54+03:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="120" LINES="30"]
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ ps aux
+[?2004lUSER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.1  0.3 167168 12760 ?        Ss   21:05   0:01 /sbin/init
+root           2  0.0  0.0      0     0 ?        S    21:05   0:00 [kthreadd]
+root           3  0.0  0.0      0     0 ?        I<   21:05   0:00 [rcu_gp]
+root           4  0.0  0.0      0     0 ?        I<   21:05   0:00 [rcu_par_gp]
+root           5  0.0  0.0      0     0 ?        I<   21:05   0:00 [slub_flushwq]
+root           6  0.0  0.0      0     0 ?        I<   21:05   0:00 [netns]
+root           8  0.0  0.0      0     0 ?        I<   21:05   0:00 [kworker/0:0H-events_highpri]
+root           9  0.0  0.0      0     0 ?        I    21:05   0:00 [kworker/u8:0-events_unbound]
+root          10  0.0  0.0      0     0 ?        I<   21:05   0:00 [mm_percpu_wq]
+root          11  0.0  0.0      0     0 ?        S    21:05   0:00 [rcu_tasks_rude_]
+root          12  0.0  0.0      0     0 ?        S    21:05   0:00 [rcu_tasks_trace]
+root          13  0.0  0.0      0     0 ?        S    21:05   0:00 [ksoftirqd/0]
+root          14  0.0  0.0      0     0 ?        I    21:05   0:00 [rcu_sched]
+root          15  0.0  0.0      0     0 ?        S    21:05   0:00 [migration/0]
+root          16  0.0  0.0      0     0 ?        S    21:05   0:00 [idle_inject/0]
+root          17  0.0  0.0      0     0 ?        I    21:05   0:00 [kworker/0:1-events]
+root          18  0.0  0.0      0     0 ?        S    21:05   0:00 [cpuhp/0]
+root          19  0.0  0.0      0     0 ?        S    21:05   0:00 [cpuhp/1]
+root          20  0.0  0.0      0     0 ?        S    21:05   0:00 [idle_inject/1]
+root          21  0.0  0.0      0     0 ?        S    21:05   0:00 [migration/1]
+root          22  0.0  0.0      0     0 ?        S    21:05   0:00 [ksoftirqd/1]
+root          24  0.0  0.0      0     0 ?        I<   21:05   0:00 [kworker/1:0H-events_highpri]
+root          25  0.0  0.0      0     0 ?        S    21:05   0:00 [cpuhp/2]
+root          26  0.0  0.0      0     0 ?        S    21:05   0:00 [idle_inject/2]
+root          27  0.0  0.0      0     0 ?        S    21:05   0:00 [migration/2]
+root          28  0.0  0.0      0     0 ?        S    21:05   0:00 [ksoftirqd/2]
+root          30  0.0  0.0      0     0 ?        I<   21:05   0:00 [kworker/2:0H-events_highpri]
+root          31  0.0  0.0      0     0 ?        S    21:05   0:00 [cpuhp/3]
+root          32  0.0  0.0      0     0 ?        S    21:05   0:00 [idle_inject/3]
+root          33  0.0  0.0      0     0 ?        S    21:05   0:00 [migration/3]
+root          34  0.0  0.0      0     0 ?        S    21:05   0:00 [ksoftirqd/3]
+root          36  0.0  0.0      0     0 ?        I<   21:05   0:00 [kworker/3:0H-events_highpri]
+root          37  0.0  0.0      0     0 ?        S    21:05   0:00 [kdevtmpfs]
+root          38  0.0  0.0      0     0 ?        I<   21:05   0:00 [inet_frag_wq]
+root          39  0.0  0.0      0     0 ?        S    21:05   0:00 [kauditd]
+root          40  0.0  0.0      0     0 ?        S    21:05   0:00 [khungtaskd]
+root          41  0.0  0.0      0     0 ?        S    21:05   0:00 [oom_reaper]
+root          42  0.0  0.0      0     0 ?        I<   21:05   0:00 [writeback]
+root          43  0.0  0.0      0     0 ?        S    21:05   0:00 [kcompactd0]
+root          44  0.0  0.0      0     0 ?        SN   21:05   0:00 [ksmd]
+root          45  0.0  0.0      0     0 ?        SN   21:05   0:00 [khugepaged]
+root          50  0.0  0.0      0     0 ?        I    21:05   0:00 [kworker/3:1-events]
+root          70  0.0  0.0      0     0 ?        I    21:05   0:00 [kworker/2:1-events]
+root          93  0.0  0.0      0     0 ?        I<   21:05   0:00 [kintegrityd]
+root          94  0.0  0.0      0     0 ?        I<   21:05   0:00 [kblockd]
+root          95  0.0  0.0      0     0 ?        I<   21:05   0:00 [blkcg_punt_bio]
+root          96  0.0  0.0      0     0 ?        I<   21:05   0:00 [tpm_dev_wq]
+root          97  0.0  0.0      0     0 ?        I<   21:05   0:00 [ata_sff]
+root          98  0.0  0.0      0     0 ?        I<   21:05   0:00 [md]
+root          99  0.0  0.0      0     0 ?        I<   21:05   0:00 [edac-poller]
+root         100  0.0  0.0      0     0 ?        I<   21:05   0:00 [devfreq_wq]
+root         101  0.0  0.0      0     0 ?        S    21:05   0:00 [watchdogd]
+root         103  0.0  0.0      0     0 ?        I<   21:05   0:00 [kworker/0:1H-kblockd]
+root         105  0.0  0.0      0     0 ?        S    21:05   0:00 [kswapd0]
+root         106  0.0  0.0      0     0 ?        S    21:05   0:00 [ecryptfs-kthrea]
+root         108  0.0  0.0      0     0 ?        I<   21:05   0:00 [kthrotld]
+root         109  0.0  0.0      0     0 ?        I<   21:05   0:00 [acpi_thermal_pm]
+root         112  0.0  0.0      0     0 ?        I    21:05   0:00 [kworker/1:1-events]
+root         113  0.0  0.0      0     0 ?        S    21:05   0:00 [scsi_eh_0]
+root         114  0.0  0.0      0     0 ?        I<   21:05   0:00 [scsi_tmf_0]
+root         115  0.0  0.0      0     0 ?        S    21:05   0:00 [scsi_eh_1]
+root         116  0.0  0.0      0     0 ?        I<   21:05   0:00 [scsi_tmf_1]
+root         117  0.0  0.0      0     0 ?        I<   21:05   0:00 [vfio-irqfd-clea]
+root         119  0.0  0.0      0     0 ?        I<   21:06   0:00 [mld]
+root         120  0.0  0.0      0     0 ?        I<   21:06   0:00 [kworker/3:1H-kblockd]
+root         121  0.0  0.0      0     0 ?        I<   21:06   0:00 [ipv6_addrconf]
+root         123  0.0  0.0      0     0 ?        I    21:06   0:00 [kworker/3:2-events]
+root         131  0.0  0.0      0     0 ?        I<   21:06   0:00 [kstrp]
+root         134  0.0  0.0      0     0 ?        I<   21:06   0:00 [zswap-shrink]
+root         135  0.0  0.0      0     0 ?        I<   21:06   0:00 [kworker/u9:0]
+root         140  0.0  0.0      0     0 ?        I<   21:06   0:00 [charger_manager]
+root         173  0.0  0.0      0     0 ?        I<   21:06   0:00 [kworker/1:1H-kblockd]
+root         177  0.0  0.0      0     0 ?        I    21:06   0:01 [kworker/1:2-mm_percpu_wq]
+root         184  0.0  0.0      0     0 ?        S    21:06   0:00 [scsi_eh_2]
+root         185  0.0  0.0      0     0 ?        I<   21:06   0:00 [scsi_tmf_2]
+root         193  0.0  0.0      0     0 ?        I<   21:06   0:00 [cryptd]
+root         240  0.0  0.0      0     0 ?        I    21:06   0:00 [kworker/0:2-events]
+root         242  0.0  0.0      0     0 ?        I<   21:06   0:00 [ttm_swap]
+root         243  0.0  0.0      0     0 ?        S    21:06   0:00 [irq/18-vmwgfx]
+root         244  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc0]
+root         245  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc1]
+root         247  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc2]
+root         248  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc3]
+root         249  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc4]
+root         250  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc5]
+root         251  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc6]
+root         252  0.0  0.0      0     0 ?        S    21:06   0:00 [card0-crtc7]
+root         258  0.0  0.0      0     0 ?        I<   21:06   0:00 [kworker/2:1H-kblockd]
+root         259  0.0  0.0      0     0 ?        I<   21:06   0:00 [kdmflush]
+root         285  0.0  0.0      0     0 ?        I<   21:06   0:00 [raid5wq]
+root         332  0.0  0.0      0     0 ?        S    21:06   0:00 [jbd2/dm-0-8]
+root         333  0.0  0.0      0     0 ?        I<   21:06   0:00 [ext4-rsv-conver]
+root         395  0.0  0.3  47756 15328 ?        S<s  21:06   0:00 /lib/systemd/systemd-journald
+root         427  0.0  0.0      0     0 ?        I<   21:06   0:00 [kaluad]
+root         430  0.0  0.0      0     0 ?        I<   21:06   0:00 [kmpath_rdacd]
+root         432  0.0  0.0      0     0 ?        I<   21:06   0:00 [kmpathd]
+root         433  0.0  0.0      0     0 ?        I<   21:06   0:00 [kmpath_handlerd]
+root         434  0.0  0.6 289456 27236 ?        SLsl 21:06   0:00 /sbin/multipathd -d -s
+root         438  0.0  0.1  11356  6048 ?        Ss   21:06   0:00 /lib/systemd/systemd-udevd
+root         557  0.0  0.0      0     0 ?        S    21:06   0:00 [jbd2/sda2-8]
+root         559  0.0  0.0      0     0 ?        I<   21:06   0:00 [ext4-rsv-conver]
+systemd+     602  0.0  0.1  89364  6604 ?        Ssl  21:06   0:00 /lib/systemd/systemd-timesyncd
+systemd+     616  0.0  0.2  16128  8080 ?        Ss   21:06   0:00 /lib/systemd/systemd-networkd
+systemd+     618  0.0  0.3  25540 12564 ?        Ss   21:06   0:00 /lib/systemd/systemd-resolved
+message+     630  0.0  0.1   8592  4864 ?        Ss   21:06   0:00 @dbus-daemon --system --address=systemd: --nofork --n
+root         635  0.0  0.4  30100 18684 ?        Ss   21:06   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-s
+root         639  0.0  0.1  23536  7644 ?        Ss   21:06   0:00 /lib/systemd/systemd-logind
+root         648  0.0  0.1   7816  4860 tty1     Ss   21:06   0:00 /bin/login -p --
+root         666  0.0  0.2  15436  8896 ?        Ss   21:06   0:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startu
+root         668  0.0  0.5 107220 21152 ?        Ssl  21:06   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unatt
+rsshaba+     750  0.0  0.2  17044  9468 ?        Ss   21:09   0:00 /lib/systemd/systemd --user
+rsshaba+     751  0.0  0.0 168920  3496 ?        S    21:09   0:00 (sd-pam)
+rsshaba+     757  0.0  0.1   5048  4096 tty1     S+   21:09   0:00 -bash
+root         767  0.0  0.2  17184 10936 ?        Ss   21:09   0:00 sshd: rsshabanov [priv]
+rsshaba+     787  0.0  0.2  17316  8296 ?        S    21:09   0:00 sshd: rsshabanov@pts/0
+rsshaba+     788  0.0  0.1   5176  4220 pts/0    Ss   21:09   0:00 -bash
+root         916  0.0  0.0      0     0 ?        R    21:15   0:00 [kworker/u8:2-events_unbound]
+root         976  0.0  0.5 293004 20408 ?        Ssl  21:15   0:00 /usr/libexec/packagekitd
+root         980  0.0  0.1 234504  6784 ?        Ssl  21:15   0:00 /usr/libexec/polkitd --no-debug
+root        1016  0.0  0.0      0     0 ?        I    21:21   0:00 [kworker/2:0-events]
+root        1034  0.0  0.0      0     0 ?        R    21:31   0:00 [kworker/u8:1-events_unbound]
+rsshaba+    1055  0.1  0.0   3228  1072 pts/0    R+   21:33   0:00 script ps-log.txt
+rsshaba+    1056  0.0  0.1   5048  4080 pts/1    Ss   21:33   0:00 bash -i
+rsshaba+    1062  0.0  0.0   7484  3348 pts/1    R+   21:34   0:00 ps aux
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ ps -u rsshabanov
+[?2004l    PID TTY          TIME CMD
+    750 ?        00:00:00 systemd
+    751 ?        00:00:00 (sd-pam)
+    757 tty1     00:00:00 bash
+    787 ?        00:00:00 sshd
+    788 pts/0    00:00:00 bash
+   1055 pts/0    00:00:00 script
+   1056 pts/1    00:00:00 bash
+   1063 pts/1    00:00:00 ps
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ top -b -d 5 > top-log.txt
+[?2004l
+^C[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ top -b -d 5 > top-log.txt %[K$[K&
+[?2004l[1] 1065
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ pgrep top\
+[?2004l[?2004h> ^C[?2004l[?2004h[?2004l
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ pgrep top\[K
+[?2004l1065
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ kill 1065
+[?2004l[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ exit
+[?2004lexit
+
+Script done on 2024-07-01 21:35:37+03:00 [COMMAND_EXIT_CODE="0"]
