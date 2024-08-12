@@ -14,5 +14,5 @@
    - name: Ensure Apache is running
      service:
        name: "{{ ansible_service_mgr }}"
-       state: started
+       state: restarted
        enabled: yes
