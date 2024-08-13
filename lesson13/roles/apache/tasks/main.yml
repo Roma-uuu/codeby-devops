@@ -1,0 +1,13 @@
+- name: Ensure Apache is running on Debian/Ubuntu
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+  when: ansible_os_family == "Debian"
+
+- name: Ensure Apache is running on RedHat/CentOS
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  when: ansible_os_family == "RedHat"

@@ -1,0 +1,21 @@
+---
+- name: Install MySQL
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - mysql-server
+    - mysql-client
+
+- name: Ensure MySQL is running
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    password: "root_password"
+    host_all: yes
+    state: present
