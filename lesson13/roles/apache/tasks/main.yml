@@ -1,18 +1,13 @@
-   ---
-   - name: Install Apache
-     package:
-       name: apache2
-       state: present
-     when: ansible_os_family == "Debian"
+- name: Ensure Apache is running on Debian/Ubuntu
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+  when: ansible_os_family == "Debian"
 
-   - name: Install Apache (CentOS)
-     package:
-       name: httpd
-       state: present
-     when: ansible_os_family == "RedHat"
-
-   - name: Ensure Apache is running
-     service:
-       name: "{{ ansible_service_mgr }}"
-       state: restarted
-       enabled: yes
+- name: Ensure Apache is running on RedHat/CentOS
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  when: ansible_os_family == "RedHat"
