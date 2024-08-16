@@ -1,0 +1,20 @@
+# Базовый образ
+   FROM debian:11
+
+   # Обновление системы и установка Nginx
+   RUN apt-get update && apt-get install -y nginx
+
+   # Создание директории для веб-контента
+   RUN mkdir -p /opt/www
+
+   # Добавление файла index.html
+   RUN echo "Hello from Nginx on Debian!" > /opt/www/index.html
+
+   # Копирование конфигурационного файла Nginx
+   RUN echo 'server { listen 80; root /opt/www; index index.html; }' > /etc/ng>
+
+   # Открытие порта 80
+   EXPOSE 80
+
+   # Запуск Nginx через Entrypoint
+   ENTRYPOINT ["nginx", "-g", "daemon off;"]
