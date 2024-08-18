@@ -1,0 +1,8 @@
+rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ ig/  docker run --name wp-mysql --network wp-net --volume wp-db:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=12345678 -e MYSQL_DATABASE=wordpress -e MYSQL_USER=wp_user -e MYSQL_PASSWORD=12345678 -d mysql:5.7
+docker: Error response from daemon: Conflict. The container name "/wp-mysql" is already in use by container "c332c299f1baa1229dff9cb0a53e62a60bf6b9158784f597852f56324350c55e". You have to remove (or rename) that container to be able to reuse that name.ql:5.7
+See 'docker run --help'.
+rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ exitn -s /etc/apache2/si
+exitabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ iuln -s /etc/apache2/sit
+rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ sln -s /etc/apache2/site
+Script done on 2024-08-18 21:17:56+03:00 [COMMAND_EXIT_CODE="125"]tc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
+rsshabanov@MSK-01:~/codeby-devops/lesson17$ pache-config$ ln -s /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
