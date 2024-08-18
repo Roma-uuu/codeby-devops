@@ -1,0 +1,23 @@
+# Базовый образ
+FROM alpine:latest
+
+# Установка Nginx
+RUN apk add --no-cache nginx
+
+# Создание директории для веб-контента
+RUN mkdir -p /opt/www
+
+# Добавление файла index.html
+RUN echo "Hello from Nginx on Alpine!" > /opt/www/index.html
+
+# Создание директории для конфигурационных файлов Nginx
+RUN mkdir -p /etc/nginx/conf.d
+
+# Копирование конфигурационного файла Nginx
+RUN echo 'server { listen 80; root /opt/www; index index.html; }' > /etc/nginx>
+
+# Открытие порта 80
+EXPOSE 80
+
+# Запуск Nginx
+CMD ["nginx", "-g", "daemon off;"]
