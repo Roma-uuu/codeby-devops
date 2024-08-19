@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: wp-mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - backend
+
+  app:
+    image: wordpress:latest
+    container_name: wp-app
+    volumes:
+      - wordpress_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - db
+
+  proxy:
+    image: nginx:latest
+    container_name: wp-proxy
+    volumes:
+      - /home/rsshabanov/codeby-devops/lesson18/nginx-config:/etc/nginx/conf.d:ro
+    networks:
+      - frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
+volumes:
+	db_data:
+		driver: local
+	  wordpress_data:
+		driver: local
+
+	networks:
+	  frontend:
+		driver: bridge
+	  backend:
+		driver: bridge
