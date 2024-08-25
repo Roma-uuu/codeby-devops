@@ -1,8 +1,82 @@
-rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ ig/  docker run --name wp-mysql --network wp-net --volume wp-db:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=12345678 -e MYSQL_DATABASE=wordpress -e MYSQL_USER=wp_user -e MYSQL_PASSWORD=12345678 -d mysql:5.7
-docker: Error response from daemon: Conflict. The container name "/wp-mysql" is already in use by container "c332c299f1baa1229dff9cb0a53e62a60bf6b9158784f597852f56324350c55e". You have to remove (or rename) that container to be able to reuse that name.ql:5.7
-See 'docker run --help'.
-rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ exitn -s /etc/apache2/si
-exitabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ iuln -s /etc/apache2/sit
-rsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ sln -s /etc/apache2/site
-Script done on 2024-08-18 21:17:56+03:00 [COMMAND_EXIT_CODE="125"]tc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
-rsshabanov@MSK-01:~/codeby-devops/lesson17$ pache-config$ ln -s /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-enabled/000-default.conf
+Script started on 2024-08-25 19:44:04+03:00 [TERM="xterm" TTY="/dev/pts/4" COLUMNS="189" LINES="49"]
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ [7msudo docker network create wp-net[27m
+[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Csudo docker network create wp-net
+[?2004l[sudo] password for rsshabanov: 
+bdfa92503c2ac700a0c75251632a5e9302134e533505e5dec6a3aab968d0c0e8
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ [7msudo docker volume create wp-db[27msudo docker volume create wp-db
+[?2004lwp-db
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ [7msudo docker volume create wp-data[27msudo docker volume create wp-data
+[?2004lwp-data
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ [7msudo docker run -d \[27m
+[7m  --name wp-mysql \[27m
+[7m  --network wp-net \[27m
+[7m  -e MYSQL_ROOT_PASSWORD=rootpassword \[27m
+[7m  -e MYSQL_DATABASE=wordpress \[27m
+[7m  -e MYSQL_USER=wpuser \[27m
+[7m  -e MYSQL_PASSWORD=wppassword \[27m
+[7m  -v wp-db:/var/lib/mysql \[27m
+[7m  mysql:5.7[27m
+[A[A[A[A[A[A[A[A[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Csudo docker run -d \
+  --name wp-mysql \
+  --network wp-net \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -e MYSQL_DATABASE=wordpress \
+  -e MYSQL_USER=wpuser \
+  -e MYSQL_PASSWORD=wppassword \
+  -v wp-db:/var/lib/mysql \
+  mysql:5.7
+[A
+[?2004lf233eae263eab5563ed77f7fea1ed0d4e45f6c2101f1deec30fe3f1da7b849d0
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ cd [K[K[Kls -la
+[?2004ltotal 12
+drwxrwxr-x  3 rsshabanov rsshabanov 4096 Aug 25 19:44 [0m[01;34m.[0m
+drwxrwxr-x 19 rsshabanov rsshabanov 4096 Aug 19 19:56 [01;34m..[0m
+drwxrwxr-x  3 rsshabanov rsshabanov 4096 Aug 18 21:16 [01;34mapache-config[0m
+-rw-rw-r--  1 rsshabanov rsshabanov    0 Aug 25 19:44 typescript
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17rsshabanov@MSK-01:~/codeby-devops/lesson17$ cd apache-config/
+[?2004l[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-configrsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ 
+[?2004l[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-configrsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ ls [K[K[Kcd[K[Kls -la
+[?2004ltotal 24
+drwxrwxr-x 3 rsshabanov rsshabanov 4096 Aug 18 21:16 [0m[01;34m.[0m
+drwxrwxr-x 3 rsshabanov rsshabanov 4096 Aug 25 19:44 [01;34m..[0m
+-rw-r--r-- 1 root       root       1165 Aug 18 21:14 apache.conf
+-rw-r--r-- 1 root       root        242 Aug 18 21:16 envvars
+-rw-r--r-- 1 root       root        112 Aug 18 21:16 ports.conf
+drwxrwxr-x 2 rsshabanov rsshabanov 4096 Aug 18 21:15 [01;34msites-available[0m
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-configrsshabanov@MSK-01:~/codeby-devops/lesson17/apache-config$ cd sites-available/
+[?2004l[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ ls -la
+[?2004ltotal 12
+drwxrwxr-x 2 rsshabanov rsshabanov 4096 Aug 18 21:15 [0m[01;34m.[0m
+drwxrwxr-x 3 rsshabanov rsshabanov 4096 Aug 18 21:16 [01;34m..[0m
+-rw-r--r-- 1 root       root        337 Aug 18 21:15 000-default.conf
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ 
+[?2004l[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ [7msudo docker run -d \[27m
+[7m  --name wp-app \[27m
+[7m  --network wp-net \[27m
+[7m  -e WORDPRESS_DB_HOST=wp-mysql:3306 \[27m
+[7m  -e WORDPRESS_DB_NAME=wordpress \[27m
+[7m  -e WORDPRESS_DB_USER=wpuser \[27m
+[7m  -e WORDPRESS_DB_PASSWORD=wppassword \[27m
+[7m  -v wp-data:/var/www/html \[27m
+[7m  -v ~/apache-config:/home/rsshabnov//codeby-devops/lesson17/apache-config/sites-available \[27m
+[7m  wordpress:latest[27m[A[A[A[A[A[A[A[A[A]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ sudo docker run -d \
+  --name wp-app \
+  --network wp-net \
+  -e WORDPRESS_DB_HOST=wp-mysql:3306 \
+  -e WORDPRESS_DB_NAME=wordpress \
+  -e WORDPRESS_DB_USER=wpuser \
+  -e WORDPRESS_DB_PASSWORD=wppassword \
+  -v wp-data:/var/www/html \
+  -v ~/apache-config:/home/rsshabnov//codeby-devops/lesson17/apache-config/sites-available \
+  wordpress:latest
+[?2004ldec9f81b1653eac9d1dbeae36ced686a84c9fb8aae75e019fd208ac56d91d2a7
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ sudo [7mdocker network create wp-net[27mdocker network create wp-net
+[?2004lError response from daemon: network with name wp-net already exists
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ a
+[?2004lbash: a: command not found
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ docker ps
+[?2004lpermission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.46/containers/json": dial unix /var/run/docker.sock: connect: permission denied
+[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson17/apache-config/sites-availablersshabanov@MSK-01:~/codeby-devops/lesson17/apache-config/sites-available$ sudo [K[K[K[K[Kexit
+[?2004lexit
+
+Script done on 2024-08-25 19:48:22+03:00 [COMMAND_EXIT_CODE="1"]
