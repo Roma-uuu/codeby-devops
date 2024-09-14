@@ -1,0 +1,19 @@
+diagnostic-pod.yamlapiVersion: v1
+kind: Pod
+metadata:
+  name: diagnostic-pod
+  namespace: dev
+spec:
+  serviceAccountName: diagnostics-sa
+  containers:
+  - name: diagnostics
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          echo 'Discovered pods:'
+          kubectl get pods -n dev -l app=wordpress
+          sleep 60
+        done
