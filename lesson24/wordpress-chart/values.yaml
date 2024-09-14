@@ -1,0 +1,26 @@
+mysql:
+  image: mysql:5.7
+  rootPassword: yourpassword
+  database: wordpress
+  pvcSize: 1Gi
+
+wordpress:
+  image: wordpress:5.7
+  dbPassword: yourpassword
+  pvcSize: 1Gi
+  replicaCount: 2
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    cpuUtilization: 80
+
+ingress:
+  enabled: true
+  host: wordpress.local
+
+# Configurations for PV and PVC
+persistence:
+  storageClass: local-storage
+  accessModes: 
+    - ReadWriteOnce
