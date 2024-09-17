@@ -1,0 +1,55 @@
+Started by user Ramazan
+
+Running as SYSTEM
+Собирается удаленно на maven
+ in workspace /var/lib/jenkins/workspace/MyMavenApp
+Parsing POMs
+Established TCP socket on 38463
+maven35-agent.jar already up to date
+maven35-interceptor.jar already up to date
+maven3-interceptor-commons.jar already up to date
+[MyMavenApp] $ java -cp /var/lib/jenkins/maven35-agent.jar:/usr/share/maven/boot/plexus-classworlds-2.x.jar:/usr/share/maven/conf/logging jenkins.maven3.agent.Maven35Main /usr/share/maven /var/lib/jenkins/remoting.jar /var/lib/jenkins/maven35-interceptor.jar /var/lib/jenkins/maven3-interceptor-commons.jar 38463
+<===[JENKINS REMOTING CAPACITY]===>channel started
+Executing Maven:  -B -f /var/lib/jenkins/workspace/MyMavenApp/pom.xml -Dmaven.repo.local=/var/lib/jenkins/workspace/MyMavenApp/.repository install
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.example:my-project >-----------------------
+[INFO] Building My Project 1.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ my-project ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory /var/lib/jenkins/workspace/MyMavenApp/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ my-project ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ my-project ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory /var/lib/jenkins/workspace/MyMavenApp/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ my-project ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ my-project ---
+[INFO] No tests to run.
+[JENKINS] Recording test results
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ my-project ---
+[WARNING] JAR will be empty - no content was marked for inclusion!
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ my-project ---
+[INFO] Installing /var/lib/jenkins/workspace/MyMavenApp/target/my-project-1.0-SNAPSHOT.jar to /var/lib/jenkins/workspace/MyMavenApp/.repository/com/example/my-project/1.0-SNAPSHOT/my-project-1.0-SNAPSHOT.jar
+[INFO] Installing /var/lib/jenkins/workspace/MyMavenApp/pom.xml to /var/lib/jenkins/workspace/MyMavenApp/.repository/com/example/my-project/1.0-SNAPSHOT/my-project-1.0-SNAPSHOT.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.353 s
+[INFO] Finished at: 2024-09-17T23:18:34+03:00
+[INFO] ------------------------------------------------------------------------
+Waiting for Jenkins to finish collecting data
+[JENKINS] Archiving /var/lib/jenkins/workspace/MyMavenApp/pom.xml to com.example/my-project/1.0-SNAPSHOT/my-project-1.0-SNAPSHOT.pom
+[JENKINS] Archiving /var/lib/jenkins/workspace/MyMavenApp/target/my-project-1.0-SNAPSHOT.jar to com.example/my-project/1.0-SNAPSHOT/my-project-1.0-SNAPSHOT.jar
+channel stopped
+Archiving artifacts
+Finished: SUCCESS
