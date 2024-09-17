@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress-config
+  namespace: {{ .Release.Namespace }}
+data:
+  WORDPRESS_CONFIG_EXTRA: "some-extra-config"
