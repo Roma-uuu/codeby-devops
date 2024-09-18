@@ -1,100 +1,97 @@
 Started by user Ramazan
-[ср сент. 18 12:12:48 MSK 2024] Starting branch indexing...
- > git --version # timeout=10
- > git --version # 'git version 2.34.1'
- > git ls-remote --symref -- https://github.com/Roma-uuu/codeby-devops.git # timeout=10
-Creating git repository in /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923
- > git init /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923 # timeout=10
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923/.git # timeout=10
 Setting origin to https://github.com/Roma-uuu/codeby-devops.git
  > git config remote.origin.url https://github.com/Roma-uuu/codeby-devops.git # timeout=10
-Fetching & pruning origin...
-Listing remote references...
- > git config --get remote.origin.url # timeout=10
+Fetching origin...
+Fetching upstream changes from origin
  > git --version # timeout=10
  > git --version # 'git version 2.34.1'
- > git ls-remote -h -- https://github.com/Roma-uuu/codeby-devops.git # timeout=10
-Fetching upstream changes from origin
  > git config --get remote.origin.url # timeout=10
- > git fetch --tags --force --progress --prune -- origin +refs/heads/*:refs/remotes/origin/* # timeout=10
-Checking branches...
-  Checking branch lesson12
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson13
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson10
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson11
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch branch_a
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson16
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson17
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson18
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson19
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson8
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson7
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson9
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson4
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson3
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch branch_b
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson6
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch branch_c
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson5
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson23
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson24
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson25
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson26
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson20
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson21
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch lesson22
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-  Checking branch master
-      ‘Jenkinsfile’ not found
-    Does not meet criteria
-Processed 26 branches
-[ср сент. 18 12:12:52 MSK 2024] Finished branch indexing. Indexing took 3,2 секунды
+ > git fetch --tags --force --progress -- origin +refs/heads/*:refs/remotes/origin/* # timeout=10
+Seen branch in repository origin/branch_a
+Seen branch in repository origin/branch_b
+Seen branch in repository origin/branch_c
+Seen branch in repository origin/lesson10
+Seen branch in repository origin/lesson11
+Seen branch in repository origin/lesson12
+Seen branch in repository origin/lesson13
+Seen branch in repository origin/lesson16
+Seen branch in repository origin/lesson17
+Seen branch in repository origin/lesson18
+Seen branch in repository origin/lesson19
+Seen branch in repository origin/lesson20
+Seen branch in repository origin/lesson21
+Seen branch in repository origin/lesson22
+Seen branch in repository origin/lesson23
+Seen branch in repository origin/lesson24
+Seen branch in repository origin/lesson25
+Seen branch in repository origin/lesson26
+Seen branch in repository origin/lesson3
+Seen branch in repository origin/lesson4
+Seen branch in repository origin/lesson5
+Seen branch in repository origin/lesson6
+Seen branch in repository origin/lesson7
+Seen branch in repository origin/lesson8
+Seen branch in repository origin/lesson9
+Seen branch in repository origin/master
+Seen 26 remote branches
+Obtained lesson26/Jenkinsfile from 896a43273c9999ef3fe3034df82979f7b4ead906
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/Multibranch_Pipeline_lesson26
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+Cloning the remote Git repository
+Cloning with configured refspecs honoured and without tags
+Cloning repository https://github.com/Roma-uuu/codeby-devops.git
+ > git init /var/lib/jenkins/workspace/Multibranch_Pipeline_lesson26 # timeout=10
+Fetching upstream changes from https://github.com/Roma-uuu/codeby-devops.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git fetch --no-tags --force --progress -- https://github.com/Roma-uuu/codeby-devops.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url https://github.com/Roma-uuu/codeby-devops.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision 896a43273c9999ef3fe3034df82979f7b4ead906 (lesson26)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 896a43273c9999ef3fe3034df82979f7b4ead906 # timeout=10
+Commit message: "Rename JenkinsFile to Jenkinsfile"
+First time build. Skipping changelog.
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Prepare)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ git diff --name-only HEAD~1
+[Pipeline] echo
+Applications to build: []
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build and Deploy)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] parallel
+No branches to run
+[Pipeline] // parallel
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
 Finished: SUCCESS
