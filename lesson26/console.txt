@@ -1,0 +1,100 @@
+Started by user Ramazan
+[ср сент. 18 12:12:48 MSK 2024] Starting branch indexing...
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git ls-remote --symref -- https://github.com/Roma-uuu/codeby-devops.git # timeout=10
+Creating git repository in /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923
+ > git init /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923 # timeout=10
+Setting origin to https://github.com/Roma-uuu/codeby-devops.git
+ > git config remote.origin.url https://github.com/Roma-uuu/codeby-devops.git # timeout=10
+Fetching & pruning origin...
+Listing remote references...
+ > git config --get remote.origin.url # timeout=10
+ > git --version # timeout=10
+ > git --version # 'git version 2.34.1'
+ > git ls-remote -h -- https://github.com/Roma-uuu/codeby-devops.git # timeout=10
+Fetching upstream changes from origin
+ > git config --get remote.origin.url # timeout=10
+ > git fetch --tags --force --progress --prune -- origin +refs/heads/*:refs/remotes/origin/* # timeout=10
+Checking branches...
+  Checking branch lesson12
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson13
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson10
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson11
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch branch_a
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson16
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson17
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson18
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson19
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson8
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson7
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson9
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson4
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson3
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch branch_b
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson6
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch branch_c
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson5
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson23
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson24
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson25
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson26
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson20
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson21
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch lesson22
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+  Checking branch master
+      ‘Jenkinsfile’ not found
+    Does not meet criteria
+Processed 26 branches
+[ср сент. 18 12:12:52 MSK 2024] Finished branch indexing. Indexing took 3,2 секунды
+Finished: SUCCESS
