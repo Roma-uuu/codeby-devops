@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    // Получаем список измененных файлов в последнем коммите
+                    changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1').trim().split('\n')
+                    
+                    // Инициализируем список приложений для сборки
+                    appsToBuild = []
+
+                    // Проверяем, какие приложения изменились
+                    if (changedFiles.any { it.startsWith('HelloWorld/') }) {
+                        appsToBuild.add('HelloWorld')
+                    }
+                    if (changedFiles.any { it.startsWith('HelloJenkins/') }) {
+                        appsToBuild.add('HelloJenkins')
+                    }
+                    if (changedFiles.any { it.startsWith('HelloDevops/') }) {
+                        appsToBuild.add('HelloDevops')
+                    }
+
+                    // Выводим список приложений для сборки
+                    echo "Applications to build: ${appsToBuild}"
+                }
+            }
+        }
+        stage('Build and Deploy') {
+            steps {
+                script {
+                    parallel appsToBuild.collectEntries { app ->
+                        ["Build and Deploy ${app}": {
+                            stage("Building ${app}") {
+                                sh "cd ${app} && mvn clean package"
+                            }
+                            stage("Testing ${app}") {
+                                sh "cd ${app} && mvn test"
+                            }
+                            stage("Deploying ${app}") {
+                                sh "cd ${app}/target && java -jar ${app}.jar &"
+                            }
+                        }]
+                    }
+                }
+            }
+        }
+    }
+}
