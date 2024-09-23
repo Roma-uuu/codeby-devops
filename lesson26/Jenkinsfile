@@ -4,13 +4,12 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    // Получаем список измененных файлов в последнем коммите
-                    changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1').trim().split('\n')
-                    
+                    // Получаем список измененных файлов
+                    changedFiles = sh(returnStdout: true, script: 'git show --pretty="" --name-only').trim().split('\n')
+
                     // Инициализируем список приложений для сборки
                     appsToBuild = []
 
-                    // Проверяем, какие приложения изменились
                     if (changedFiles.any { it.startsWith('HelloWorld/') }) {
                         appsToBuild.add('HelloWorld')
                     }
@@ -21,27 +20,44 @@ pipeline {
                         appsToBuild.add('HelloDevops')
                     }
 
-                    // Выводим список приложений для сборки
                     echo "Applications to build: ${appsToBuild}"
                 }
             }
         }
-        stage('Build and Deploy') {
+        stage('Build and SonarQube Analysis') {
+            when {
+                expression { appsToBuild.size() > 0 }
+            }
             steps {
                 script {
                     parallel appsToBuild.collectEntries { app ->
-                        ["Build and Deploy ${app}": {
+                        ["Build and Analyze ${app}": {
                             stage("Building ${app}") {
                                 sh "cd ${app} && mvn clean package"
                             }
-                            stage("Testing ${app}") {
-                                sh "cd ${app} && mvn test"
-                            }
-                            stage("Deploying ${app}") {
-                                sh "cd ${app}/target && java -jar ${app}.jar &"
+                            stage("SonarQube Analysis for ${app}") {
+                                dir("${app}") {
+                                    withSonarQubeEnv('SonarQube') {
+                                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                            sh """
+                                                mvn sonar:sonar \
+                                                -Dsonar.projectKey=${app} \
+                                                -Dsonar.host.url=http://localhost:9000 \
+                                                -Dsonar.login=${SONAR_TOKEN}
+                                            """
+                                        }
+                                    }
+                                }
                             }
                         }]
                     }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
