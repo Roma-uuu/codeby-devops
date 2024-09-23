@@ -1,3 +1,6 @@
+ИЗМЕНЕНИЯ ТУТ
+
+
 Started by user Ramazan
  > git rev-parse --resolve-git-dir /var/lib/jenkins/caches/git-e2318d17d3652cf7fcde6d449a5ae923/.git # timeout=10
 Setting origin to https://github.com/Roma-uuu/codeby-devops.git
