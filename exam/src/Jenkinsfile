@@ -12,6 +12,17 @@ pipeline {
                 git 'https://github.com/Roma-uuu/codeby-devops.git'
             }
         }
+
+    stage('List Files') {
+        steps {
+            sh 'pwd'
+            sh 'ls -la'
+            sh 'ls -la exam'
+            sh 'ls -la exam/src'
+    	    }
+	}
+
+
         stage('Build') {
             steps {
                 sh 'mvn clean package'
