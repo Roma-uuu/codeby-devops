@@ -9,20 +9,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Roma-uuu/codeby-devops.git'
+                git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
             }
         }
-
-    stage('List Files') {
-        steps {
-            sh 'pwd'
-            sh 'ls -la'
-            sh 'ls -la exam'
-            sh 'ls -la exam/src'
-    	    }
-	}
-
-
+        stage('List Files') {
+            steps {
+                sh 'pwd'
+                sh 'ls -la'
+                sh 'ls -la src'
+            }
+        }
         stage('Build') {
             steps {
                 sh 'mvn clean package'
@@ -38,7 +34,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                     sh """
                     echo \$DOCKERHUB_TOKEN | docker login -u \$DOCKERHUB_USERNAME --password-stdin
-                    docker build -t \$IMAGE_NAME:\$IMAGE_TAG -f exam/src/Dockerfile exam
+                    docker build -t \$IMAGE_NAME:\$IMAGE_TAG -f exam/src/Dockerfile .
                     docker push \$IMAGE_NAME:\$IMAGE_TAG
                     """
                 }
