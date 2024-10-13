@@ -1,31 +1,0 @@
-Script started on 2024-07-09 22:11:08+03:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="138" LINES="51"]
-[33m0% [Working][0m            Hit:1 http://archive.ubuntu.com/ubuntu focal InRelease
-[33m0% [Waiting for headers][0m                        Hit:2 http://security.ubuntu.com/ubuntu focal-security InRelease
-[33m0% [Waiting for headers][0m                        Hit:3 http://archive.ubuntu.com/ubuntu focal-updates InRelease
-[33m0% [Waiting for headers][0m                        Hit:4 http://archive.ubuntu.com/ubuntu focal-backports InRelease
-[33m                        0% [Working][0m[33m0% [Working][0m[33m0% [Working][0m[33m0% [Working][0m[33m20% [Working][0m             Reading package lists... 0%Reading package lists... 0%Reading package lists... 0%Reading package lists... 2%Reading package lists... 2%Reading package lists... 4%Reading package lists... 4%Reading package lists... 4%Reading package lists... 4%Reading package lists... 4%Reading package lists... 4%Reading package lists... 27%Reading package lists... 27%Reading package lists... 30%Reading package lists... 39%Reading package lists... 39%Reading package lists... 39%Reading package lists... 39%Reading package lists... 39%Reading package lists... 39%Reading package lists... 48%Reading package lists... 48%Reading package lists... 54%Reading package lists... 54%Reading package lists... 62%Reading package lists... 62%Reading package lists... 66%Reading package lists... 66%Reading package lists... 69%Reading package lists... 69%Reading package lists... 70%Reading package lists... 70%Reading package lists... 70%Reading package lists... 70%Reading package lists... 70%Reading package lists... 70%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 71%Reading package lists... 78%Reading package lists... 78%Reading package lists... 80%Reading package lists... 84%Reading package lists... 84%Reading package lists... 92%Reading package lists... 92%Reading package lists... 96%Reading package lists... 96%Reading package lists... 98%Reading package lists... 98%Reading package lists... 99%Reading package lists... 99%Reading package lists... 99%Reading package lists... 99%Reading package lists... 99%Reading package lists... 99%Reading package lists... Done
-Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree       
-Reading state information... 0%Reading state information... 0%Reading state information... Done
-11 packages can be upgraded. Run 'apt list --upgradable' to see them.
-Reading package lists... 0%Reading package lists... 100%Reading package lists... Done
-Building dependency tree... 0%Building dependency tree... 0%Building dependency tree... 50%Building dependency tree... 50%Building dependency tree       
-Reading state information... 0%Reading state information... 0%Reading state information... Done
-apache2 is already the newest version (2.4.41-4ubuntu3.19).
-0 upgraded, 0 newly installed, 0 to remove and 11 not upgraded.
-[?1h=[0;1;32m●[0m apache2.service - The Apache HTTP Server[m
-     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)[m
-     Active: [0;1;32mactive (running)[0m since Tue 2024-07-09 19:09:06 UTC; 2min 6s ago[m
-       Docs: https://httpd.apache.org/docs/2.4/[m
-   Main PID: 1958 (apache2)[m
-      Tasks: 55 (limit: 4557)[m
-     Memory: 6.6M[m
-        CPU: 120ms[m
-     CGroup: /system.slice/apache2.service[m
-             ├─1958 /usr/sbin/apache2 -k start[m
-             ├─1960 /usr/sbin/apache2 -k start[m
-             └─1961 /usr/sbin/apache2 -k start[m
-[m
-Jul 09 19:09:06 lesson6 systemd[1]: Starting The Apache HTTP Server...[m
-Jul 09 19:09:06 lesson6 systemd[1]: Started The Apache HTTP Server.[m
-[K[?1l>
-Script done on 2024-07-09 22:11:13+03:00 [COMMAND_EXIT_CODE="0"]
