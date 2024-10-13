@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ваш_логин/ваш_репозиторий.git'
+                git 'https://github.com/Roma-uuu/codeby-devops.git'
             }
         }
         stage('Build') {
