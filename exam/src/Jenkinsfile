@@ -14,7 +14,9 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                dir('exam/src') {
+                    sh 'mvn clean package'
+                }
             }
         }
         stage('Test Docker Access') {
@@ -24,20 +26,23 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                    sh """
-                    echo \$DOCKERHUB_TOKEN | docker login -u \$DOCKERHUB_USERNAME --password-stdin
-                    docker build -t \$IMAGE_NAME:\$IMAGE_TAG -f exam/src/Dockerfile .
-                    docker push \$IMAGE_NAME:\$IMAGE_TAG
-                    """
+                dir('exam/src') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                        sh """
+                        echo \$DOCKERHUB_TOKEN | docker login -u \$DOCKERHUB_USERNAME --password-stdin
+                        docker build -t \$IMAGE_NAME:\$IMAGE_TAG .
+                        docker push \$IMAGE_NAME:\$IMAGE_TAG
+                        """
+                    }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
+                // Если файлы Kubernetes находятся в 'exam/k8s', измените путь
                 sh '''
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
+                kubectl apply -f exam/k8s/deployment.yaml
+                kubectl apply -f exam/k8s/service.yaml
                 '''
             }
         }
