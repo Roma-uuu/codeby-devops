@@ -1,7 +1,3 @@
-        IMAGE_NAME = 'apkerigz/devops'
-        IMAGE_TAG = 'v.0.0.44'
-                git 'https://github.com/Roma-uuu/codeby-devops.git'
-
 pipeline {
     agent any
 
