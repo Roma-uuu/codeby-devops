@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "apkerigz/devops"
         IMAGE_TAG = 'v.0.0.44'
+        MANIFEST_PATH = 'exam/src/k8s'
     }
 
     stages {
@@ -28,30 +29,35 @@ pipeline {
             steps {
                 dir('exam/src') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                        sh """
-                        echo \$DOCKERHUB_TOKEN | docker login -u \$DOCKERHUB_USERNAME --password-stdin
-                        docker build -t \$IMAGE_NAME:\$IMAGE_TAG .
-                        docker push \$IMAGE_NAME:\$IMAGE_TAG
-                        """
+                        sh '''
+                        echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                        docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                        docker push $IMAGE_NAME:$IMAGE_TAG
+                        '''
                     }
                 }
             }
         }
-
-	stage('Check kubectl') {
-    	    steps {
-        	sh 'which kubectl || echo "kubectl not found"'
-        	sh 'kubectl version --client || echo "kubectl not available"'
+        stage('Verify Files') {
+            steps {
+                sh 'ls -la $MANIFEST_PATH'
+            }
         }
-
-
+        stage('Test Kubernetes Connection') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl cluster-info'
+                    sh 'kubectl get nodes'
+                }
+            }
+        }
         stage('Deploy to Kubernetes') {
             steps {
-		withEnv(["KUBECONFIG=/var/lib/jenkins/.kube/config"]) {
-                    sh 'kubectl apply -f k8s/deployment.yaml'
-                    sh 'kubectl apply -f k8s/service.yaml'
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f $MANIFEST_PATH/deployment.yaml'
+                    sh 'kubectl apply -f $MANIFEST_PATH/service.yaml'
                 }
-	    }
+            }
         }
     }
 }
