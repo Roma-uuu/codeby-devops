@@ -1,4 +1,4 @@
-pipeline {
+xpipeline {
     agent any
 
     environment {
@@ -39,12 +39,11 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                // Если файлы Kubernetes находятся в 'exam/k8s', измените путь
-                sh '''
-                kubectl apply -f exam/k8s/deployment.yaml
-                kubectl apply -f exam/k8s/service.yaml
-                '''
-            }
+		withEnv(["KUBECONFIG=/var/lib/jenkins/.kube/config"]) {
+                    sh 'kubectl apply -f /home/rsshabanov/codeby-devops/exam/k8s/deployment.yaml'
+                    sh 'kubectl apply -f /home/rsshabanov/codeby-devops/exam/k8s/service.yaml'
+                }
+	    }
         }
     }
 }
