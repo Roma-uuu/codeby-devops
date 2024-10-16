@@ -37,6 +37,12 @@ pipeline {
                 sh 'ls -la exam/src/k8s/'
             }
         }
+        stage('Check kubectl') {
+            steps {
+                sh 'which kubectl || echo "kubectl not found"'
+                sh 'kubectl version --client || echo "kubectl not available"'
+            }
+        }
         stage('Test Kubernetes Connection') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
