@@ -62,7 +62,8 @@ pipeline {
                     withEnv(["KUBECONFIG=${pwd()}/kubeconfig.yaml"]) {
                         sh 'kubectl apply -f exam/src/k8s/deployment.yaml'
                         sh 'kubectl apply -f exam/src/k8s/service.yaml'                }
-            }
-        }
-    }
+				}
+			}
+		}
+	}
 }
