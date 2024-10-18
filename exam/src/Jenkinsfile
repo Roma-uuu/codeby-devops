@@ -45,23 +45,18 @@ pipeline {
         }
         stage('Test Kubernetes Connection') {
             steps {
-                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                    // Записываем содержимое kubeconfig в файл
-                    writeFile file: 'kubeconfig.yaml', text: "${KUBECONFIG_CONTENT}"
-                    // Устанавливаем переменную окружения KUBECONFIG
-                    withEnv(["KUBECONFIG=${pwd()}/kubeconfig.yaml"]) {
-                        sh 'kubectl cluster-info'
-                    }
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    sh 'kubectl --kubeconfig=$KUBECONFIG_FILE cluster-info'
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                    writeFile file: 'kubeconfig.yaml', text: "${KUBECONFIG_CONTENT}"
-                    withEnv(["KUBECONFIG=${pwd()}/kubeconfig.yaml"]) {
-                        sh 'kubectl apply -f exam/src/k8s/deployment.yaml'
-                        sh 'kubectl apply -f exam/src/k8s/service.yaml'                }
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
+                    kubectl --kubeconfig=$KUBECONFIG_FILE apply -f exam/src/k8s/deployment.yaml
+                    kubectl --kubeconfig=$KUBECONFIG_FILE apply -f exam/src/k8s/service.yaml
+                    '''
 				}
 			}
 		}
