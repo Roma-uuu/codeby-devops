@@ -46,7 +46,7 @@ pipeline {
         stage('Test Kubernetes Connection') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh 'kubectl --kubeconfig=$KUBECONFIG_FILE cluster-info'
+                    sh 'kubectl cluster-info --kubeconfig=$KUBECONFIG_FILE'
                 }
             }
         }
@@ -54,11 +54,11 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
-                    kubectl --kubeconfig=$KUBECONFIG_FILE apply -f exam/src/k8s/deployment.yaml
-                    kubectl --kubeconfig=$KUBECONFIG_FILE apply -f exam/src/k8s/service.yaml
+                    kubectl apply -f exam/src/k8s/deployment.yaml --kubeconfig=$KUBECONFIG_FILE
+                    kubectl apply -f exam/src/k8s/service.yaml --kubeconfig=$KUBECONFIG_FILE
                     '''
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 }
