@@ -45,19 +45,21 @@ pipeline {
         }
         stage('Test Kubernetes Connection') {
             steps {
-                // Используем переменную KUBECONFIG для доступа к kubeconfig
-                withEnv(["KUBECONFIG=/home/rsshabanov/exam/src/kubeconfig-jenkins.yaml"]) {
-                    sh 'kubectl cluster-info'
+                // Используем учетные данные Kubernetes через сервисный аккаунт
+                withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                    sh '''
+                    kubectl cluster-info --token=$K8S_TOKEN
+                    '''
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                // Применяем манифесты Kubernetes с использованием переменной KUBECONFIG
-                withEnv(["KUBECONFIG=/home/rsshabanov/exam/src/kubeconfig-jenkins.yaml"]) {
+                // Применяем манифесты Kubernetes с использованием токена сервисного аккаунта
+                withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
                     sh '''
-                    kubectl apply -f exam/src/k8s/deployment.yaml
-                    kubectl apply -f exam/src/k8s/service.yaml
+                    kubectl apply -f exam/src/k8s/deployment.yaml --token=$K8S_TOKEN
+                    kubectl apply -f exam/src/k8s/service.yaml --token=$K8S_TOKEN
                     '''
                 }
             }
