@@ -6,7 +6,7 @@ spec:
   type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.appName }}
-#  ports:
-#  - port: {{ .Values.service.port }}
-#    targetPort: 8080
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 8080
 #    nodePort: {{ .Values.service.nodePort }}
