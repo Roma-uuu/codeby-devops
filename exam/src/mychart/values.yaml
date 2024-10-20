@@ -1,0 +1,10 @@
+image:
+  repository: apkerigz/devops
+  tag: "v.0.0.44"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+k8sManifestsPath: exam/src/k8s   # Путь к вашим Kubernetes манифестам

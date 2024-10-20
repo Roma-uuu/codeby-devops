@@ -25,7 +25,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                        docker build -t apkerigz/devops:v.0.0.44 .
+                        docker build -t apkerigz/devops:v.0.0.44 . 
                         docker push apkerigz/devops:v.0.0.44
                         '''
                     }
@@ -53,14 +53,16 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Deploy using Helm') {
             steps {
-                // Применяем манифесты Kubernetes с использованием токена сервисного аккаунта
                 withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
-                    sh '''
-                    kubectl apply -f exam/src/k8s/deployment.yaml --token=$K8S_TOKEN
-                    kubectl apply -f exam/src/k8s/service.yaml --token=$K8S_TOKEN
-                    '''
+                    dir('exam/src/k8s') {
+                        sh '''
+                        helm upgrade --install devops-app ./mychart \
+                            --set image.tag=v.0.0.44 \
+                            --kube-token=$K8S_TOKEN
+                        '''
+                    }
                 }
             }
         }
