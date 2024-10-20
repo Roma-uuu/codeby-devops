@@ -4,7 +4,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                dir('exam/src') {
+                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                }
             }
         }
         stage('Build') {
@@ -16,7 +18,9 @@ pipeline {
         }
         stage('Test Docker Access') {
             steps {
-                sh 'docker info'
+                dir('exam/src') {
+                    sh 'docker info'
+                }
             }
         }
         stage('Build and Push Docker Image') {
@@ -34,29 +38,37 @@ pipeline {
         }
         stage('Verify Files') {
             steps {
-                sh 'ls -la exam/src/k8s/'
+                dir('exam/src') {
+                    sh 'ls -la exam/src/k8s/'
+                }
             }
         }
         stage('Check kubectl') {
             steps {
-                sh 'which kubectl || echo "kubectl not found"'
-                sh 'kubectl version --client || echo "kubectl not available"'
+                dir('exam/src') {
+                    sh 'which kubectl || echo "kubectl not found"'
+                    sh 'kubectl version --client || echo "kubectl not available"'
+                }
             }
         }
         stage('Test Kubernetes Connection') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh 'kubectl cluster-info --kubeconfig=$KUBECONFIG_FILE'
+                dir('exam/src') {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        sh 'kubectl cluster-info --kubeconfig=$KUBECONFIG_FILE'
+                    }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh '''
-                    kubectl apply -f exam/src/k8s/deployment.yaml --kubeconfig=$KUBECONFIG_FILE
-                    kubectl apply -f exam/src/k8s/service.yaml --kubeconfig=$KUBECONFIG_FILE
-                    '''
+                dir('exam/src') {
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        sh '''
+                        kubectl apply -f exam/src/k8s/deployment.yaml --kubeconfig=$KUBECONFIG_FILE
+                        kubectl apply -f exam/src/k8s/service.yaml --kubeconfig=$KUBECONFIG_FILE
+                        '''
+                    }
                 }
             }
         }
