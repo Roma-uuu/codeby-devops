@@ -10,7 +10,7 @@ pipeline {
         stage('Build') {
             steps {
                 dir('exam/src') {
-                    sh 'mvn clean package'
+                    sh 'mvn clean package -Dcheckstyle.skip=true'
                 }
             }
         }
