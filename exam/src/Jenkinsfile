@@ -32,19 +32,35 @@ pipeline {
                 }
             }
         }
-        stage('Verify Helm Files') {
+        stage('Verify Files') {
             steps {
-                sh 'ls -la exam/helm/'
+                sh 'ls -la exam/src/k8s/'
             }
         }
-        stage('Deploy to Kubernetes with Helm') {
+        stage('Check kubectl') {
             steps {
-                dir('exam/helm') {
-                    withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
-                        sh '''
-                        helm upgrade --install myapp . --set image.repository=apkerigz/devops,image.tag=v.0.0.44 --kube-token=$K8S_TOKEN
-                        '''
-                    }
+                sh 'which kubectl || echo "kubectl not found"'
+                sh 'kubectl version --client || echo "kubectl not available"'
+            }
+        }
+        stage('Test Kubernetes Connection') {
+            steps {
+                // Используем учетные данные Kubernetes через сервисный аккаунт
+                withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                    sh '''
+                    kubectl cluster-info --token=$K8S_TOKEN
+                    '''
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                // Применяем манифесты Kubernetes с использованием токена сервисного аккаунта
+                withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                    sh '''
+                    kubectl apply -f exam/src/k8s/deployment.yaml --token=$K8S_TOKEN
+                    kubectl apply -f exam/src/k8s/service.yaml --token=$K8S_TOKEN
+                    '''
                 }
             }
         }
