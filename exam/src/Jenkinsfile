@@ -4,13 +4,11 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Клонируем репозиторий в ветке exam
                 git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
             }
         }
         stage('Build') {
             steps {
-                // Выполняем сборку Maven в директории exam/src, где находится pom.xml
                 dir('exam/src') {
                     sh 'mvn clean package -Dcheckstyle.skip=true'
                 }
@@ -23,7 +21,6 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                // Указываем правильную директорию exam/src для Docker build
                 dir('exam/src') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
@@ -37,7 +34,6 @@ pipeline {
         }
         stage('Verify Files') {
             steps {
-                // Проверяем наличие файлов Kubernetes манифестов
                 sh 'ls -la exam/src/k8s/'
             }
         }
@@ -49,19 +45,19 @@ pipeline {
         }
         stage('Test Kubernetes Connection') {
             steps {
-                // Проверяем подключение к кластеру Kubernetes с использованием kubeconfig
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                    sh 'kubectl cluster-info --kubeconfig=$KUBECONFIG_FILE'
+                // Используем переменную KUBECONFIG для доступа к kubeconfig
+                withEnv(["KUBECONFIG=/home/rsshabanov/exam/src/kubeconfig-jenkins.yaml"]) {
+                    sh 'kubectl cluster-info'
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                // Применяем манифесты Kubernetes из директории exam/src/k8s
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                // Применяем манифесты Kubernetes с использованием переменной KUBECONFIG
+                withEnv(["KUBECONFIG=/home/rsshabanov/exam/src/kubeconfig-jenkins.yaml"]) {
                     sh '''
-                    kubectl apply -f exam/src/k8s/deployment.yaml --kubeconfig=$KUBECONFIG_FILE
-                    kubectl apply -f exam/src/k8s/service.yaml --kubeconfig=$KUBECONFIG_FILE
+                    kubectl apply -f exam/src/k8s/deployment.yaml
+                    kubectl apply -f exam/src/k8s/service.yaml
                     '''
                 }
             }
