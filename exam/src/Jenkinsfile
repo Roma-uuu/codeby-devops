@@ -25,10 +25,31 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                        docker build -t spring-petclinic:latest .
-                        docker push spring-petclinic:latest
+                        docker build -t apkerigz/devops:v.0.0.44 .
+                        docker push apkerigz/devops:v.0.0.44
                         '''
                     }
+                }
+            }
+        }
+        stage('Verify Files') {
+            steps {
+                sh 'ls -la exam/src/k8s/'
+            }
+        }
+        stage('Check kubectl') {
+            steps {
+                sh 'which kubectl || echo "kubectl not found"'
+                sh 'kubectl version --client || echo "kubectl not available"'
+            }
+        }
+        stage('Test Kubernetes Connection') {
+            steps {
+                // Используем учетные данные Kubernetes через сервисный аккаунт
+                withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                    sh '''
+                    kubectl cluster-info --token=$K8S_TOKEN
+                    '''
                 }
             }
         }
@@ -38,7 +59,8 @@ pipeline {
                     dir('exam/src/mychart') {
                         sh '''
                         helm upgrade --install petclinic-app . \
-                            --set image.tag=latest \
+                            --set image.repository=apkerigz/devops \
+                            --set image.tag=v.0.0.44 \
                             --kube-token=$K8S_TOKEN
                         '''
                     }
