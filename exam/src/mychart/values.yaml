@@ -1,10 +1,13 @@
+replicaCount: 2
+
+appName: petclinic
+
 image:
-  repository: apkerigz/devops
-  tag: "v.0.0.44"
-  pullPolicy: IfNotPresent
+  repository: spring-petclinic
+  tag: latest
+  pullPolicy: Never
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
-
-k8sManifestsPath: exam/src/k8s   # Путь к вашим Kubernetes манифестам
+  nodePort: 30007

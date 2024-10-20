@@ -1,1 +1,12 @@
-{{- include "helm-skip" (readFile "exam/src/k8s/service.yaml") | nindent 2 }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-service
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ .Values.appName }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: 8080
+    nodePort: {{ .Values.service.nodePort }}
