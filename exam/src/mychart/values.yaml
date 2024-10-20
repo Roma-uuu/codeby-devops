@@ -7,7 +7,7 @@ image:
   tag: latest
   pullPolicy: Never
 
-service:
-  type: NodePort
-  port: 80
-  nodePort: 30007
+#service:
+#  type: NodePort
+#  port: 80
+#  nodePort: 30007
