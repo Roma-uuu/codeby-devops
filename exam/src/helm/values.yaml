@@ -1,0 +1,18 @@
+replicaCount: 1
+
+image:
+  repository: apkerigz/devops
+  tag: v.0.0.44
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"

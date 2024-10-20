@@ -1,0 +1,1 @@
+{{- .Files.Get "exam/src/k8s/deployment.yaml" | nindent 2 -}}
