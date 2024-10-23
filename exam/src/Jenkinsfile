@@ -23,13 +23,14 @@ pipeline {
             steps {
                 dir('exam/src') {
                     script {
-                        def appVersion = "v.${env.BUILD_NUMBER}"
+                        def appVersion = "v.0.0.44"  // Указываем конкретную версию
+                        echo "Building Docker image with tag: ${appVersion}"
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                            sh '''
+                            sh """
                             echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
                             docker build -t apkerigz/devops:${appVersion} .
                             docker push apkerigz/devops:${appVersion}
-                            '''
+                            """
                         }
                     }
                 }
@@ -40,13 +41,14 @@ pipeline {
                 withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
                     dir('exam/src/mychart') {
                         script {
-                            def appVersion = "v.${env.BUILD_NUMBER}"
-                            sh '''
+                            def appVersion = "v.0.0.44"  // Используем ту же версию
+                            echo "Deploying Helm chart with image tag: ${appVersion}"
+                            sh """
                             helm upgrade --install petclinic-app . \
                                 --set image.repository=apkerigz/devops \
                                 --set image.tag=${appVersion} \
                                 --kube-token=$K8S_TOKEN
-                            '''
+                            """
                         }
                     }
                 }
