@@ -60,9 +60,14 @@ pipeline {
             steps {
                 dir('exam/src') {
                     script {
-                        // Добавляем установку коллекции перед запуском плейбука
+                        // Создание ansible.cfg для указания пути к коллекциям
+                        sh '''
+                        echo "[defaults]" > ansible.cfg
+                        echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
+                        '''
+
+                        // Установка коллекции и запуск плейбука
                         sh 'ansible-galaxy collection install kubernetes.core'
-                        // Запуск самого плейбука
                         sh 'ansible-playbook -i inventory monitoring_playbook.yml --ask-become-pass'
                     }
                 }
