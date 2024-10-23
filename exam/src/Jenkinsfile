@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Указываем версию из переменной окружения или из файла
+        appVersion = readFile('VERSION').trim()  // Если есть файл VERSION
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -23,7 +28,6 @@ pipeline {
             steps {
                 dir('exam/src') {
                     script {
-                        def appVersion = "v.0.0.44"  // Указываем конкретную версию
                         echo "Building Docker image with tag: ${appVersion}"
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                             sh """
@@ -41,7 +45,6 @@ pipeline {
                 withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
                     dir('exam/src/mychart') {
                         script {
-                            def appVersion = "v.0.0.44"  // Используем ту же версию
                             echo "Deploying Helm chart with image tag: ${appVersion}"
                             sh """
                             helm upgrade --install petclinic-app . \
