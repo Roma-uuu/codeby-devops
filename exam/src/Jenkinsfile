@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         appVersion = readFile('exam/src/VERSION').trim()
+        BECOME_PASSWORD = credentials('for_ansible')
     }
 
     stages {
@@ -66,9 +67,8 @@ pipeline {
                         echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
                         '''
 
-                        // Установка коллекции и запуск плейбука
                         sh 'ansible-galaxy collection install kubernetes.core'
-                        sh 'ansible-playbook -i inventory monitoring_playbook.yml --ask-become-pass'
+                        sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD}'"
                     }
                 }
             }
