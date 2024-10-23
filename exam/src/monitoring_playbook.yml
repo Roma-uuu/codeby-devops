@@ -1,13 +1,15 @@
+---
 - name: Install Monitoring Stack (Prometheus, Loki, Grafana, and Dashboards)
   hosts: localhost
   become: yes
   vars:
     prometheus_namespace: monitoring
-    grafana_admin_user: "admin"
-    grafana_admin_password: "admin"
+    grafana_admin_user: "admin"   # Логин для Grafana
+    grafana_admin_password: "admin"  # Пароль для Grafana
     grafana_node_port: 32000
     kubeconfig_path: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"
-    grafana_host_ip: "192.168.49.2"
+    grafana_host_ip: "192.168.49.2"  # IP Minikube
+
   tasks:
     - name: Create namespace for monitoring
       kubernetes.core.k8s:
@@ -34,15 +36,30 @@
     - name: Update Helm repositories
       command: helm repo update
 
-    - name: Install Prometheus
+    - name: Install Prometheus for monitoring pods and nodes
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: prometheus
         chart_ref: prometheus-community/prometheus
         release_namespace: "{{ prometheus_namespace }}"
         create_namespace: false
+        values:
+          server:
+            global:
+              scrape_interval: 15s
+            scrape_configs:
+              - job_name: 'kubernetes-pods'
+                kubernetes_sd_configs:
+                  - role: pod
+                relabel_configs:
+                  - source_labels: [__meta_kubernetes_pod_label_app]
+                    action: keep
+                    regex: petclinic-app
+              - job_name: 'kubernetes-nodes'
+                kubernetes_sd_configs:
+                  - role: node
 
-    - name: Install Loki and Promtail
+    - name: Install Loki and Promtail for collecting logs
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         name: loki
@@ -82,7 +99,7 @@
       wait_for:
         timeout: 30
 
-    - name: Get Grafana session cookies
+    - name: Get Grafana session cookies for authentication
       uri:
         url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/login"
         method: POST
@@ -97,10 +114,10 @@
         status_code: 200
       register: grafana_login_response
 
-    - name: Add Prometheus as Grafana data source
+    - name: Add or Update Prometheus as Grafana data source
       uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources"
-        method: POST
+        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources/name/Prometheus"
+        method: PUT
         headers:
           Content-Type: "application/json"
           Cookie: "{{ grafana_login_response.set_cookie }}"
@@ -115,10 +132,10 @@
           }
         status_code: 200
 
-    - name: Add Loki as Grafana data source
+    - name: Add Loki as Grafana data source via Grafana API
       uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources"
-        method: POST
+        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources/name/Loki"
+        method: PUT
         headers:
           Content-Type: "application/json"
           Cookie: "{{ grafana_login_response.set_cookie }}"
@@ -132,7 +149,7 @@
           }
         status_code: 200
 
-    - name: Add Grafana dashboard for logs and state monitoring
+    - name: Add Grafana dashboard for logs and state monitoring via API
       uri:
         url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/dashboards/db"
         method: POST
