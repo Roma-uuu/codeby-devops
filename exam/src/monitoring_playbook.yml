@@ -114,7 +114,26 @@
         status_code: 200
       register: grafana_login_response
 
-    - name: Add or Update Prometheus as Grafana data source
+    - name: Add Prometheus as Grafana data source (if not exists)
+      uri:
+        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Cookie: "{{ grafana_login_response.set_cookie }}"
+        body_format: json
+        body: |
+          {
+            "name": "Prometheus",
+            "type": "prometheus",
+            "access": "proxy",
+            "url": "http://prometheus-server.{{ prometheus_namespace }}.svc.cluster.local:80",
+            "isDefault": true
+          }
+        status_code: [200, 409]  # Позволить игнорировать 409 (если существует)
+      register: prometheus_add_response
+
+    - name: Update Prometheus as Grafana data source if exists
       uri:
         url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources/name/Prometheus"
         method: PUT
@@ -131,6 +150,7 @@
             "isDefault": true
           }
         status_code: 200
+      when: prometheus_add_response.status == 409  # Обновляем только если 409 (уже существует)
 
     - name: Add Loki as Grafana data source via Grafana API
       uri:
