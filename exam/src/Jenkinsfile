@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Указываем версию из переменной окружения или из файла
-        appVersion = readFile('VERSION').trim()  // Если есть файл VERSION
+        // Указываем путь к файлу VERSION внутри директории src
+        appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
     }
 
     stages {
