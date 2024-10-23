@@ -3,10 +3,10 @@ replicaCount: 2
 appName: petclinic
 
 image:
-  repository: spring-petclinic
+  repository: apkerigz/devops
   tag: latest
-  pullPolicy: Never
+  pullPolicy: Always
 
 service:
   type: NodePort
-  port: 80
+  port: 8080
