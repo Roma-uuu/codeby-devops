@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                node {
+                node('any') {  // Добавлен параметр label
                     cleanWs()  // Полная очистка рабочего пространства перед началом работы
                 }
             }
@@ -101,7 +101,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node('any') {  // Добавлен параметр label
                 cleanWs()  // Очистка рабочего пространства в конце пайплайна
             }
         }
