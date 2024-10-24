@@ -4,6 +4,7 @@ pipeline {
     environment {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
         BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
@@ -14,7 +15,9 @@ pipeline {
         }
         stage('Checkout') {
             steps {
-                git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                retry(3) {
+                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                }
             }
         }
         stage('Build') {
@@ -42,11 +45,13 @@ pipeline {
                     script {
                         echo "Building Docker image with tag: ${appVersion}"
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                            sh """
-                            echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                            docker build -t apkerigz/devops:${appVersion} .
-                            docker push apkerigz/devops:${appVersion}
-                            """
+                            retry(3) {
+                                sh """
+                                echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                                docker build -t apkerigz/devops:${appVersion} .
+                                docker push apkerigz/devops:${appVersion}
+                                """
+                            }
                         }
                     }
                 }
@@ -73,13 +78,11 @@ pipeline {
             steps {
                 dir('exam/src') {
                     script {
-                        // Создание ansible.cfg для указания пути к коллекциям
                         sh '''
                         echo "[defaults]" > ansible.cfg
                         echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
                         '''
 
-                        // Установка коллекции и запуск плейбука с передачей sudo-пароля через переменную
                         sh 'ansible-galaxy collection install kubernetes.core'
                         sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD}'"
                     }
