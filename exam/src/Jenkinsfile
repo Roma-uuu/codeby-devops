@@ -4,7 +4,6 @@ pipeline {
     environment {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
         BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
-        GRAFANA_TOKEN = credentials('grafana-api-token')  // Токен API для Grafana
     }
 
     stages {
@@ -80,9 +79,9 @@ pipeline {
                         echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
                         '''
 
-                        // Установка коллекции и запуск плейбука с передачей sudo-пароля и токена Grafana через переменные
+                        // Установка коллекции и запуск плейбука с передачей sudo-пароля через переменную
                         sh 'ansible-galaxy collection install kubernetes.core'
-                        sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD} grafana_token=${GRAFANA_TOKEN}'"
+                        sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD}'"
                     }
                 }
             }
@@ -90,7 +89,9 @@ pipeline {
     }
     post {
         always {
-            cleanWs()  // Очистка рабочего пространства в конце пайплайна
+            node {  // Добавление node для корректной работы cleanWs()
+                cleanWs()  // Очистка рабочего пространства в конце пайплайна
+            }
         }
     }
 }
