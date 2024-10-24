@@ -10,13 +10,22 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                cleanWs()  // Полная очистка рабочего пространства перед началом работы
+                node {
+                    cleanWs()  // Полная очистка рабочего пространства перед началом работы
+                }
             }
         }
         stage('Checkout') {
             steps {
                 retry(3) {
-                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                    script {
+                        try {
+                            git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                        } catch (Exception e) {
+                            echo "Git clone failed: ${e.message}"
+                            error 'Git clone failed'
+                        }
+                    }
                 }
             }
         }
@@ -92,7 +101,9 @@ pipeline {
     }
     post {
         always {
-            cleanWs()  // Очистка рабочего пространства в конце пайплайна
+            node {
+                cleanWs()  // Очистка рабочего пространства в конце пайплайна
+            }
         }
     }
 }
