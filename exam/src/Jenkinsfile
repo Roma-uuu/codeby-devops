@@ -4,7 +4,7 @@ pipeline {
     environment {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
         BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
-        KUBECONFIG = '/var/lib/jenkins/.kube/kubeconfig-jenkins.yaml'  // Указание пути к kubeconfig
+        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'  // Указание пути к kubeconfig
     }
 
     stages {
