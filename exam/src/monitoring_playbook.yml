@@ -2,6 +2,15 @@
 - name: Install Monitoring Stack (Prometheus, Loki, Grafana, and Dashboards)
   hosts: localhost
   tasks:
+    - name: Check Kubernetes connectivity
+      command: kubectl --kubeconfig=/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml get namespaces
+      register: kubectl_output
+      changed_when: false
+      failed_when: kubectl_output.rc != 0
+      ignore_errors: yes
+      notify:
+        - Debug: Show Kubernetes connectivity output
+
     - name: Create namespace for monitoring
       kubernetes.core.k8s:
         state: present
@@ -10,6 +19,8 @@
           kind: Namespace
           metadata:
             name: monitoring
+      register: create_namespace_output
+      failed_when: create_namespace_output is failed
 
     - name: Add Helm repository for Prometheus
       community.kubernetes.helm_repository:
@@ -42,7 +53,7 @@
             enabled: true
             config:
               snippets: {}
-    
+
     - name: Install Grafana
       community.kubernetes.helm:
         chart_ref: grafana/grafana
@@ -77,3 +88,8 @@
         body_format: form-urlencoded
         return_content: yes
       register: grafana_login
+
+  handlers:
+    - name: Debug: Show Kubernetes connectivity output
+      debug:
+        var: kubectl_output.stdout
