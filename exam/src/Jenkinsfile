@@ -5,7 +5,7 @@ pipeline {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
         BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        K8S_TOKEN = credentials('k8s_token')
+        K8S_TOKEN = credentials('k8s-sa-token')  // Правильный ID для Kubernetes токена
         KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
         NGROK_AUTHTOKEN = credentials('ngrok_authtoken')
     }
@@ -61,7 +61,8 @@ pipeline {
                         helm upgrade --install petclinic-app . \
                         --set image.repository=apkerigz/devops \
                         --set image.tag=${appVersion} \
-                        --kubeconfig=${KUBECONFIG}
+                        --kubeconfig=${KUBECONFIG} \
+                        --set serviceAccount.token=${K8S_TOKEN}  # Используем правильный токен
                         """
                     }
                 }
