@@ -1,16 +1,16 @@
 # Сначала создаем билд-образ на основе OpenJDK 17 с Maven
-FROM openjdk:17-jdk-alpine
+FROM openjdk:17-jdk-alpine AS build
 WORKDIR /app
 
 # Копируем pom.xml и зависимости для предварительной сборки и кэширования
-COPY pom.xml ./
+COPY pom.xml ./ 
 COPY src ./src
 
 # Сборка и создание jar файла
 RUN mvn clean package -DskipTests
 
-# Финальный образ только с JRE для минимального размера
-FROM openjdk:17-jre-slim
+# Финальный образ с JDK для выполнения приложения
+FROM openjdk:17-jdk-slim  # Используем существующий образ
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
