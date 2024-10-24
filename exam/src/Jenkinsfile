@@ -3,16 +3,13 @@ pipeline {
 
     environment {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
-        BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        K8S_TOKEN = credentials('k8s-sa-token')  // Используем правильный ID токена для Kubernetes
         KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
     }
 
     stages {
         stage('Clean Workspace') {
             steps {
-                cleanWs()  // Полная очистка рабочего пространства перед началом работы
+                cleanWs()
             }
         }
 
@@ -56,13 +53,15 @@ pipeline {
                 dir('exam/src/mychart') {
                     script {
                         echo "Deploying Helm chart with image tag: ${appVersion}"
-                        sh """
-                        helm upgrade --install petclinic-app . \
-                        --set image.repository=apkerigz/devops \
-                        --set image.tag=${appVersion} \
-                        --kubeconfig=${KUBECONFIG} \
-                        --set serviceAccount.token=${K8S_TOKEN}
-                        """
+                        withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                            sh """
+                            helm upgrade --install petclinic-app . \
+                            --set image.repository=apkerigz/devops \
+                            --set image.tag=${appVersion} \
+                            --kubeconfig=${KUBECONFIG} \
+                            --set serviceAccount.token=${K8S_TOKEN}
+                            """
+                        }
                     }
                 }
             }
@@ -71,10 +70,12 @@ pipeline {
         stage('Deploy Monitoring Stack via Ansible') {
             steps {
                 script {
-                    sh """
-                    ansible-playbook -i inventory monitoring_playbook.yml \
-                    --extra-vars "ansible_become_pass=${BECOME_PASSWORD}" 
-                    """
+                    withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
+                        sh """
+                        ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
+                        --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
+                        """
+                    }
                 }
             }
         }
@@ -84,14 +85,12 @@ pipeline {
                 script {
                     withCredentials([string(credentialsId: 'ngrok_authtoken', variable: 'NGROK_AUTHTOKEN')]) {
                         def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
-
                         sh """
                         echo "Setting up Ngrok..."
                         ngrok authtoken ${NGROK_AUTHTOKEN}
                         ngrok http ${nodeIp}:30000 --log=stdout > ngrok.log &
                         sleep 5
                         """
-
                         def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
                         echo "Access the application at: ${publicUrl}"
                     }
