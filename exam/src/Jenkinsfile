@@ -7,39 +7,35 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()  // Полная очистка рабочего пространства перед началом работы
+            }
+        }
         stage('Checkout') {
             steps {
                 git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
             }
         }
-
         stage('Build') {
-            parallel {
-                stage('Build Maven Project') {
-                    steps {
-                        dir('exam/src') {
-                            sh 'mvn clean package -Dcheckstyle.skip=true'
-                        }
-                    }
-                }
-                stage('Prepare Docker Build') {
-                    steps {
-                        script {
-                            docker.image('maven:3.8.6-openjdk-17-slim').inside {
-                                echo "Preparing Docker image with tag: ${appVersion}"
-                            }
-                        }
-                    }
+            steps {
+                dir('exam/src') {
+                    sh 'mvn clean package -Dcheckstyle.skip=true'
                 }
             }
         }
-
         stage('Test Docker Access') {
             steps {
-                sh 'docker info'
+                script {
+                    try {
+                        sh 'docker info'
+                    } catch (Exception e) {
+                        echo 'Docker is not accessible!'
+                        error 'Failing the build due to Docker issue'
+                    }
+                }
             }
         }
-
         stage('Build and Push Docker Image') {
             steps {
                 dir('exam/src') {
@@ -48,7 +44,7 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                             sh """
                             echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                            docker build --no-cache -t apkerigz/devops:${appVersion} .
+                            docker build -t apkerigz/devops:${appVersion} .
                             docker push apkerigz/devops:${appVersion}
                             """
                         }
@@ -56,7 +52,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy using Helm') {
             steps {
                 withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
@@ -74,7 +69,6 @@ pipeline {
                 }
             }
         }
-
         stage('Run Ansible Playbook') {
             steps {
                 dir('exam/src') {
@@ -91,6 +85,11 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            cleanWs()  // Очистка рабочего пространства в конце пайплайна
         }
     }
 }
