@@ -1,5 +1,5 @@
 # Сначала создаем билд-образ на основе OpenJDK 17 с Maven
-FROM maven:3.8.6-openjdk-17 AS build
+FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Копируем pom.xml и зависимости для предварительной сборки и кэширования
