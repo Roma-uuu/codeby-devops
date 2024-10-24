@@ -1,194 +1,78 @@
 ---
 - name: Install Monitoring Stack (Prometheus, Loki, Grafana, and Dashboards)
   hosts: localhost
-  become: yes
-  vars:
-    prometheus_namespace: monitoring
-    grafana_admin_user: "admin"   # Логин для Grafana
-    grafana_admin_password: "admin"  # Пароль для Grafana
-    grafana_node_port: 32000
-    kubeconfig_path: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"
-    grafana_host_ip: "192.168.49.2"  # IP Minikube
-
   tasks:
     - name: Create namespace for monitoring
       kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: "{{ prometheus_namespace }}"
+        api_version: v1
+        kind: Namespace
+        name: monitoring
+      register: ns_monitoring
 
     - name: Add Helm repository for Prometheus
-      kubernetes.core.helm_repository:
-        name: prometheus-community
-        repo_url: https://prometheus-community.github.io/helm-charts
-        state: present
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
     - name: Add Helm repository for Grafana and Loki
-      kubernetes.core.helm_repository:
-        name: grafana
-        repo_url: https://grafana.github.io/helm-charts
-        state: present
+      shell: helm repo add grafana https://grafana.github.io/helm-charts
 
     - name: Update Helm repositories
-      command: helm repo update
+      shell: helm repo update
 
     - name: Install Prometheus for monitoring pods and nodes
-      kubernetes.core.helm:
-        kubeconfig: "{{ kubeconfig_path }}"
-        name: prometheus
-        chart_ref: prometheus-community/prometheus
-        release_namespace: "{{ prometheus_namespace }}"
-        create_namespace: false
-        values:
-          server:
-            global:
-              scrape_interval: 15s
-            scrape_configs:
-              - job_name: 'kubernetes-pods'
-                kubernetes_sd_configs:
-                  - role: pod
-                relabel_configs:
-                  - source_labels: [__meta_kubernetes_pod_label_app]
-                    action: keep
-                    regex: petclinic-app
-              - job_name: 'kubernetes-nodes'
-                kubernetes_sd_configs:
-                  - role: node
+      shell: helm install prometheus prometheus-community/prometheus --namespace monitoring
 
     - name: Install Loki and Promtail for collecting logs
-      kubernetes.core.helm:
-        kubeconfig: "{{ kubeconfig_path }}"
-        name: loki
-        chart_ref: grafana/loki-stack
-        release_namespace: "{{ prometheus_namespace }}"
-        create_namespace: false
+      shell: helm install loki grafana/loki-stack --namespace monitoring
 
     - name: Install Grafana
-      kubernetes.core.helm:
-        kubeconfig: "{{ kubeconfig_path }}"
-        name: grafana
-        chart_ref: grafana/grafana
-        release_namespace: "{{ prometheus_namespace }}"
-        create_namespace: false
-        values:
-          adminPassword: "{{ grafana_admin_password }}"
-          service:
-            type: NodePort
-            nodePort: "{{ grafana_node_port }}"
+      shell: helm install grafana grafana/grafana --namespace monitoring
 
     - name: Wait for Grafana pod to be ready
-      retries: 20
-      delay: 40
       kubernetes.core.k8s_info:
-        kubeconfig: "{{ kubeconfig_path }}"
+        api_version: v1
         kind: Pod
-        namespace: "{{ prometheus_namespace }}"
+        namespace: monitoring
         label_selectors:
           - app.kubernetes.io/name=grafana
-      register: grafana_pods
-      until: >
-        grafana_pods.resources | length > 0 and
-        grafana_pods.resources[0].status.conditions is defined and
-        grafana_pods.resources[0].status.conditions[0].status == "True"
+        wait: yes
+        timeout: 600
 
     - name: Wait for 30 seconds to ensure Grafana service is available
-      wait_for:
-        timeout: 30
+      pause:
+        seconds: 30
 
     - name: Get Grafana session cookies for authentication
       uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/login"
-        method: POST
-        body_format: json
+        url: "http://{{ grafana_host }}:{{ grafana_port }}/api/health"
         headers:
-          Content-Type: "application/json"
-        body: |
-          {
-            "user": "{{ grafana_admin_user }}",
-            "password": "{{ grafana_admin_password }}"
-          }
-        status_code: 200
-      register: grafana_login_response
+          Authorization: "Bearer {{ grafana_token }}"
+        method: GET
+      register: grafana_session
 
     - name: Add Prometheus as Grafana data source (if not exists)
       uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources"
-        method: POST
+        url: "http://{{ grafana_host }}:{{ grafana_port }}/api/datasources"
         headers:
-          Content-Type: "application/json"
-          Cookie: "{{ grafana_login_response.set_cookie }}"
+          Authorization: "Bearer {{ grafana_token }}"
+        method: POST
         body_format: json
-        body: |
-          {
-            "name": "Prometheus",
-            "type": "prometheus",
-            "access": "proxy",
-            "url": "http://prometheus-server.{{ prometheus_namespace }}.svc.cluster.local:80",
-            "isDefault": true
-          }
-        status_code: [200, 409]  # Позволить игнорировать 409 (если существует)
-      register: prometheus_add_response
+        body:
+          name: Prometheus
+          type: prometheus
+          url: http://prometheus-server.monitoring.svc.cluster.local
+          access: proxy
+          basicAuth: false
+      register: prometheus_add
 
     - name: Update Prometheus as Grafana data source if exists
       uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources/name/Prometheus"
+        url: "http://{{ grafana_host }}:{{ grafana_port }}/api/datasources/name/Prometheus"
+        headers:
+          Authorization: "Bearer {{ grafana_token }}"
         method: PUT
-        headers:
-          Content-Type: "application/json"
-          Cookie: "{{ grafana_login_response.set_cookie }}"
         body_format: json
-        body: |
-          {
-            "name": "Prometheus",
-            "type": "prometheus",
-            "access": "proxy",
-            "url": "http://prometheus-server.{{ prometheus_namespace }}.svc.cluster.local:80",
-            "isDefault": true
-          }
-        status_code: 200
-      when: prometheus_add_response.status == 409  # Обновляем только если 409 (уже существует)
-
-    - name: Add Loki as Grafana data source via Grafana API
-      uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/datasources/name/Loki"
-        method: PUT
-        headers:
-          Content-Type: "application/json"
-          Cookie: "{{ grafana_login_response.set_cookie }}"
-        body_format: json
-        body: |
-          {
-            "name": "Loki",
-            "type": "loki",
-            "access": "proxy",
-            "url": "http://loki.{{ prometheus_namespace }}.svc.cluster.local:3100"
-          }
-        status_code: 200
-
-    - name: Add Grafana dashboard for logs and state monitoring via API
-      uri:
-        url: "http://{{ grafana_host_ip }}:{{ grafana_node_port }}/api/dashboards/db"
-        method: POST
-        headers:
-          Content-Type: "application/json"
-          Cookie: "{{ grafana_login_response.set_cookie }}"
-        body_format: json
-        body: |
-          {
-            "dashboard": {
-              "id": null,
-              "uid": "loki-logs",
-              "title": "Loki Logs & Application State",
-              "tags": ["logs", "loki", "prometheus"],
-              "timezone": "browser",
-              "schemaVersion": 16,
-              "version": 0,
-              "panels": []
-            },
-            "overwrite": true
-          }
-        status_code: 200
+        body:
+          url: http://prometheus-server.monitoring.svc.cluster.local
+          access: proxy
+          basicAuth: false
+      when: prometheus_add.json.message == 'Data source with same name already exists'

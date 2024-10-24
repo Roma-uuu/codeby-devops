@@ -4,7 +4,7 @@ pipeline {
     environment {
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
         BECOME_PASSWORD = credentials('for_ansible')  // Укажите ID Jenkins Credentials для sudo пароля
-        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'  // Указание пути к kubeconfig
+        GRAFANA_TOKEN = credentials('grafana-api-token')  // Токен API для Grafana
     }
 
     stages {
@@ -63,7 +63,7 @@ pipeline {
                             helm upgrade --install petclinic-app . \
                                 --set image.repository=apkerigz/devops \
                                 --set image.tag=${appVersion} \
-                                --kubeconfig=${KUBECONFIG}
+                                --kubeconfig=/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml
                             """
                         }
                     }
@@ -80,9 +80,9 @@ pipeline {
                         echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
                         '''
 
-                        // Установка коллекции и запуск плейбука с передачей sudo-пароля через переменную
+                        // Установка коллекции и запуск плейбука с передачей sudo-пароля и токена Grafana через переменные
                         sh 'ansible-galaxy collection install kubernetes.core'
-                        sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD}'"
+                        sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD} grafana_token=${GRAFANA_TOKEN}'"
                     }
                 }
             }
