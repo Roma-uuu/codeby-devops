@@ -10,22 +10,13 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                node('any') {  // Добавлен параметр label
-                    cleanWs()  // Полная очистка рабочего пространства перед началом работы
-                }
+                cleanWs()  // Полная очистка рабочего пространства перед началом работы
             }
         }
         stage('Checkout') {
             steps {
                 retry(3) {
-                    script {
-                        try {
-                            git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
-                        } catch (Exception e) {
-                            echo "Git clone failed: ${e.message}"
-                            error 'Git clone failed'
-                        }
-                    }
+                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
                 }
             }
         }
@@ -87,11 +78,13 @@ pipeline {
             steps {
                 dir('exam/src') {
                     script {
+                        // Создание ansible.cfg для указания пути к коллекциям
                         sh '''
                         echo "[defaults]" > ansible.cfg
                         echo "collections_paths = /home/rsshabanov/.ansible/collections:/usr/share/ansible/collections" >> ansible.cfg
                         '''
 
+                        // Установка коллекции и запуск плейбука с передачей sudo-пароля через переменную
                         sh 'ansible-galaxy collection install kubernetes.core'
                         sh "ansible-playbook -i inventory monitoring_playbook.yml --extra-vars 'ansible_become_pass=${BECOME_PASSWORD}'"
                     }
@@ -101,9 +94,7 @@ pipeline {
     }
     post {
         always {
-            node('any') {  // Добавлен параметр label
-                cleanWs()  // Очистка рабочего пространства в конце пайплайна
-            }
+            cleanWs()  // Очистка рабочего пространства в конце пайплайна
         }
     }
 }
