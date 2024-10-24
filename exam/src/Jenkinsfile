@@ -71,10 +71,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
-                        sh """
+                        sh '''
                         ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
                         --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
-                        """
+                        '''
                     }
                 }
             }
