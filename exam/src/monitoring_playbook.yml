@@ -81,8 +81,8 @@
             nodePort: "{{ grafana_node_port }}"
 
     - name: Wait for Grafana pod to be ready
-      retries: 10
-      delay: 30
+      retries: 20
+      delay: 40
       kubernetes.core.k8s_info:
         kubeconfig: "{{ kubeconfig_path }}"
         kind: Pod
