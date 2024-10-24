@@ -89,7 +89,7 @@
         return_content: yes
       register: grafana_login
 
-# Handlers должны находиться вне блока tasks
+# Блок handlers вынесен отдельно
   handlers:
     - name: Debug: Show Kubernetes connectivity output
       debug:
