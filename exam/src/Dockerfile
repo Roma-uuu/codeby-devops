@@ -1,5 +1,5 @@
 # Сначала создаем билд-образ на основе OpenJDK 17 с Maven
-FROM openjdk:17-jdk-alpine AS build
+FROM openjdk:17-jdk
 WORKDIR /app
 
 # Копируем pom.xml и зависимости для предварительной сборки и кэширования
