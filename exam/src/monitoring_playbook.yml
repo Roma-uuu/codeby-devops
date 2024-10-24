@@ -13,22 +13,18 @@
             name: monitoring
 
     - name: Add Helm repository for Prometheus
-      community.kubernetes.helm_repository:
-        name: prometheus-community
-        repo_url: https://prometheus-community.github.io/helm-charts
-        kubeconfig: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"  # Добавляем kubeconfig для корректной работы
+      command:
+        cmd: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --kubeconfig /home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml
+      register: helm_repo_prometheus
 
     - name: Add Helm repository for Grafana and Loki
-      community.kubernetes.helm_repository:
-        name: grafana
-        repo_url: https://grafana.github.io/helm-charts
-        kubeconfig: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"
+      command:
+        cmd: helm repo add grafana https://grafana.github.io/helm-charts --kubeconfig /home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml
+      register: helm_repo_grafana
 
     - name: Update Helm repositories
-      community.kubernetes.helm:
-        name: helm
-        kubeconfig: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"
-        command: repo update
+      command:
+        cmd: helm repo update --kubeconfig /home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml
 
     - name: Install Prometheus for monitoring pods and nodes
       community.kubernetes.helm:
