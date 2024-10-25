@@ -1,46 +1,71 @@
 ---
-- hosts: localhost
-  become: true
+- name: Install Monitoring Stack (Prometheus and Grafana)
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    kubeconfig_path: "/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml"
+    node_ip: "{{ lookup('pipe', 'kubectl get nodes -o jsonpath=\"{.items[0].status.addresses[0].address}\"') }}"
+
   tasks:
+    - name: Create namespace for monitoring
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
+
     - name: Add Helm repository for Prometheus
-      community.general.helm_repository:
+      kubernetes.core.helm_repository:
         name: prometheus-community
         repo_url: https://prometheus-community.github.io/helm-charts
-        state: present
+        repo_state: present
+        kubeconfig: "{{ kubeconfig_path }}"
 
     - name: Add Helm repository for Grafana
-      community.general.helm_repository:
+      kubernetes.core.helm_repository:
         name: grafana
         repo_url: https://grafana.github.io/helm-charts
-        state: present
+        repo_state: present
+        kubeconfig: "{{ kubeconfig_path }}"
 
     - name: Update Helm repositories
-      community.general.helm:
-        command: repo update
+      command:
+        _raw_params: "helm repo update"
+        _uses_shell: true
 
-    - name: Install Prometheus using Helm
-      community.general.helm:
-        name: kube-prometheus-stack
-        chart: prometheus-community/kube-prometheus-stack
-        release: prometheus
-        namespace: monitoring
-        create_namespace: true
-
-    - name: Install Grafana using Helm
-      community.general.helm:
-        name: grafana
-        chart: grafana/grafana
-        release: grafana
-        namespace: monitoring
-        create_namespace: true
-        values:
-          - adminPassword: "admin"
-          - service:
+    - name: Install Prometheus
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        release_name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+        release_state: present
+        release_values:
+          server:
+            service:
               type: NodePort
-              nodePort: 32000
+              nodePort: 30900
+
+    - name: Install Grafana
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        release_name: grafana
+        chart_ref: grafana/grafana
+        release_namespace: monitoring
+        release_state: present
+        release_values:
+          adminPassword: "admin"
+          service:
+            type: NodePort
+            nodePort: 32000
 
     - name: Wait for Grafana to be ready
-      community.kubernetes.k8s_info:
+      kubernetes.core.k8s_info:
         api_version: v1
         kind: Pod
         namespace: monitoring
@@ -48,8 +73,8 @@
           - app.kubernetes.io/name=grafana
       register: grafana_pods
 
-    - name: Wait for Grafana pod to be ready
-      community.kubernetes.k8s:
+    - name: Wait for Grafana pod to be running
+      kubernetes.core.k8s:
         state: present
         wait: yes
         name: "{{ item.metadata.name }}"
@@ -59,6 +84,8 @@
       retries: 10
       delay: 15
 
-    - name: Forward Grafana port
-      community.kubernetes.kubectl:
-        command: "port-forward svc/grafana 32000:80 --namespace monitoring"
+    - name: Display Grafana and Prometheus access URLs
+      debug:
+        msg: |
+          Access Grafana at: http://{{ node_ip }}:32000
+          Access Prometheus at: http://{{ node_ip }}:30900
