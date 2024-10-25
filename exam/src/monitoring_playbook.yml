@@ -70,4 +70,4 @@
   handlers:
     - name: Debug: Show Kubernetes connectivity output
       debug:
-        var: kubectl_output.stdout
+        msg: "Kubernetes connectivity output"
