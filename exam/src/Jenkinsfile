@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_HUB_REPO = 'your-docker-hub-repo'
         KUBECONFIG = '/path/to/.kube/config'
-        vault_jwt_secret = credentials('jwt')
         NGROK_AUTHTOKEN = credentials('ngrok_authtoken')
         BECOME_PASSWORD = credentials('ansible_become_password')
     }
