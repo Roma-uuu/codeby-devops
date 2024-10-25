@@ -67,6 +67,12 @@ pipeline {
             }
         }
 
+        stage('Install Required Ansible Collections') {
+            steps {
+                sh 'ansible-galaxy collection install kubernetes.core'
+            }
+        }
+
         stage('Deploy Monitoring Stack via Ansible') {
             steps {
                 script {
