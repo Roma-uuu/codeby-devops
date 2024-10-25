@@ -66,8 +66,3 @@
         body_format: form-urlencoded
         return_content: yes
       register: grafana_login
-
-  handlers:
-    - name: Debug: Show Kubernetes connectivity output
-      debug:
-        msg: "Kubernetes connectivity output"
