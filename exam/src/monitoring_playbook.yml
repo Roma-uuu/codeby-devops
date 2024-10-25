@@ -1,36 +1,26 @@
 ---
-- name: Setup monitoring with Grafana, Prometheus, and Loki
+- name: Install monitoring stack on Kubernetes
   hosts: localhost
   tasks:
     - name: Add Helm repository for Prometheus
       community.general.helm_repository:
         name: prometheus-community
         repo_url: https://prometheus-community.github.io/helm-charts
-      register: add_prometheus_repo
 
     - name: Add Helm repository for Grafana
       community.general.helm_repository:
         name: grafana
         repo_url: https://grafana.github.io/helm-charts
-      register: add_grafana_repo
 
     - name: Update Helm repositories
       command: helm repo update
-      when: add_prometheus_repo.changed or add_grafana_repo.changed
 
-    - name: Install Prometheus for monitoring
+    - name: Install Prometheus
       community.general.helm:
         name: prometheus
         chart_ref: prometheus-community/prometheus
         namespace: monitoring
         create_namespace: true
-        release_state: present
-
-    - name: Install Loki and Promtail for logging
-      community.general.helm:
-        name: loki
-        chart_ref: grafana/loki-stack
-        namespace: monitoring
         release_state: present
 
     - name: Install Grafana
@@ -56,50 +46,3 @@
     - name: Wait for Grafana to be fully ready
       pause:
         seconds: 15
-
-    - name: Forward Grafana port (if needed for testing)
-      command: kubectl port-forward svc/grafana 3000:80 -n monitoring &
-      async: 60
-      poll: 0
-      ignore_errors: yes
-
-    - name: Get Grafana session cookies for authentication
-      uri:
-        url: http://localhost:3000/login
-        method: POST
-        body_format: json
-        body:
-          user: admin
-          password: admin
-        return_content: yes
-      register: grafana_auth
-      failed_when: "'bad login data' in grafana_auth.json.message"
-
-    - name: Set up Prometheus as a Grafana data source
-      uri:
-        url: "http://localhost:3000/api/datasources"
-        method: POST
-        body_format: json
-        body:
-          name: Prometheus
-          type: prometheus
-          url: http://prometheus-server.monitoring.svc.cluster.local:80
-          access: proxy
-          isDefault: true
-        headers:
-          Cookie: "{{ grafana_auth.set_cookie }}"
-        status_code: 200
-
-    - name: Set up Loki as a Grafana data source
-      uri:
-        url: "http://localhost:3000/api/datasources"
-        method: POST
-        body_format: json
-        body:
-          name: Loki
-          type: loki
-          url: http://loki.monitoring.svc.cluster.local:3100
-          access: proxy
-        headers:
-          Cookie: "{{ grafana_auth.set_cookie }}"
-        status_code: 200
