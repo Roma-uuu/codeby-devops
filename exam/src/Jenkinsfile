@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
+        DOCKER_HUB_REPO = 'apkerigz/devops'
         KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
+        appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
     }
 
     stages {
@@ -35,13 +36,11 @@ pipeline {
                     script {
                         echo "Building Docker image with tag: ${appVersion}"
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                            retry(3) {
-                                sh """
+                            sh '''
                                 echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                                docker build -t apkerigz/devops:${appVersion} .
-                                docker push apkerigz/devops:${appVersion}
-                                """
-                            }
+                                docker build -t $DOCKER_HUB_REPO:${appVersion} .
+                                docker push $DOCKER_HUB_REPO:${appVersion}
+                            '''
                         }
                     }
                 }
@@ -54,13 +53,13 @@ pipeline {
                     script {
                         echo "Deploying Helm chart with image tag: ${appVersion}"
                         withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
-                            sh """
+                            sh '''
                             helm upgrade --install petclinic-app . \
-                            --set image.repository=apkerigz/devops \
+                            --set image.repository=$DOCKER_HUB_REPO \
                             --set image.tag=${appVersion} \
-                            --kubeconfig=${KUBECONFIG} \
-                            --set serviceAccount.token=${K8S_TOKEN}
-                            """
+                            --kubeconfig=$KUBECONFIG \
+                            --set serviceAccount.token=$K8S_TOKEN
+                            '''
                         }
                     }
                 }
@@ -81,45 +80,23 @@ pipeline {
                     withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
                         sh '''
                         ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
-                        --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
+                        --extra-vars "ansible_become_pass=$BECOME_PASSWORD"
                         '''
                     }
                 }
             }
         }
 
-        stage('Port Forwarding for Local Access') {
-            steps {
-                script {
-                    sh '''
-                    echo "Starting port-forwarding for local access..."
-
-                    # Проброс порта для Grafana
-                    kubectl port-forward svc/grafana 32000:80 -n monitoring &
-                    
-                    # Проброс порта для Prometheus
-                    kubectl port-forward svc/prometheus 30900:9090 -n monitoring &
-
-                    # Проброс порта для приложения
-                    kubectl port-forward svc/petclinic-service 30000:8080 -n default &
-                    
-                    sleep 5
-                    '''
-                }
-            }
-        }
-
-        stage('Expose Application via Ngrok') {
+        stage('Start Ngrok Tunnel') {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'ngrok_authtoken', variable: 'NGROK_AUTHTOKEN')]) {
                         def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
-                        sh """
-                        echo "Setting up Ngrok..."
-                        ngrok authtoken ${NGROK_AUTHTOKEN}
+                        sh '''
+                        ngrok authtoken $NGROK_AUTHTOKEN
                         ngrok http ${nodeIp}:30000 --log=stdout > ngrok.log &
                         sleep 5
-                        """
+                        '''
                         def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
                         echo "Access the application at: ${publicUrl}"
                     }
@@ -127,11 +104,10 @@ pipeline {
             }
         }
 
-        stage('Test Service Availability') {
+        stage('Check Service Availability') {
             steps {
                 script {
                     def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
-
                     def services = [
                         ['name': 'Grafana', 'url': "http://${nodeIp}:32000"],
                         ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"],
@@ -149,7 +125,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline finished successfully!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
             echo 'Pipeline failed.'
