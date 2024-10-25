@@ -6,75 +6,72 @@ set -e
 # Переходим в директорию скрипта
 cd "$(dirname "$0")"
 
-# Проверяем, есть ли директория проекта
-if [ ! -d "spring-petclinic" ]; then
-  echo "Директория 'spring-petclinic' не найдена. Клонируем репозиторий..."
-  git clone https://github.com/spring-projects/spring-petclinic.git
+# Проверка на наличие Docker, Minikube и ngrok
+if ! command -v docker &> /dev/null || ! command -v minikube &> /dev/null || ! command -v ngrok &> /dev/null; then
+  echo "Необходимы Docker, Minikube и ngrok. Установите их и повторите попытку."
+  exit 1
 fi
 
-cd spring-petclinic
-
-# Шаг 1: Запуск Minikube
+# Запуск Minikube с использованием Docker-драйвера
 echo "Запуск Minikube..."
 minikube start --driver=docker
 
-# Шаг 2: Сборка проекта
-echo "Сборка проекта с помощью Maven..."
-mvn clean package -Dcheckstyle.skip=true
-
-# Шаг 3: Использование Docker-демона Minikube
-echo "Настройка окружения Docker для Minikube..."
+# Настройка Docker-окружения для работы с Minikube
+echo "Настройка Docker-окружения для Minikube..."
 eval $(minikube docker-env)
 
-# Шаг 4: Сборка Docker-образа
-echo "Сборка Docker-образа..."
-docker build -t spring-petclinic:latest -f ../Dockerfile ../
+# Сборка Docker-образа для приложения
+echo "Сборка Docker-образа приложения..."
+docker build -t myapp:latest -f Dockerfile .
 
-# Шаг 5: Возвращение к локальному Docker-демону
+# Возвращение к локальному Docker-демону
 echo "Возвращение к локальному Docker-демону..."
 eval $(minikube docker-env -u)
 
-# Шаг 6: Установка Helm, если он не установлен
+# Установка Helm, если он не установлен
 if ! command -v helm &> /dev/null; then
-  echo "Helm не найден, устанавливаю Helm..."
+  echo "Установка Helm..."
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-# Шаг 7: Добавление репозиториев Helm
-echo "Добавление репозиториев Helm..."
+# Добавление Helm-репозиториев и обновление
+echo "Добавление и обновление Helm-репозиториев..."
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# Шаг 8: Установка Prometheus, Loki и Grafana через Helm
+# Установка Prometheus, Loki и Grafana для мониторинга
 echo "Установка Prometheus, Loki и Grafana через Helm..."
 helm upgrade --install prometheus prometheus-community/prometheus --namespace monitoring --create-namespace
 helm upgrade --install loki grafana/loki-stack --namespace monitoring
 helm upgrade --install grafana grafana/grafana --namespace monitoring --set adminPassword=admin --set service.type=NodePort --set service.nodePort=32000
 
-# Шаг 9: Применение манифестов Kubernetes для приложения
-echo "Применение манифестов Kubernetes для приложения spring-petclinic..."
-kubectl apply -f ../k8s/deployment.yaml
-kubectl apply -f ../k8s/service.yaml
+# Применение конфигурации Kubernetes из манифестов Helm Chart и values.yaml
+echo "Применение манифестов Kubernetes для приложения..."
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
 
-# Шаг 10: Ожидание запуска подов
-echo "Ожидание запуска подов..."
-kubectl rollout status deployment/petclinic-deployment
+# Ожидание запуска подов
+echo "Ожидание завершения развёртывания подов..."
+kubectl rollout status deployment/myapp-deployment
 
-# Шаг 11: Получение URL сервиса приложения
-echo "Получение URL сервиса приложения..."
-minikube service petclinic-service --url
+# Запуск ngrok для публичного доступа
+echo "Запуск ngrok для доступа к приложению..."
+nohup ngrok http $(minikube service myapp-service --url | sed 's|http://||') &
 
-# Шаг 12: Получение URL для доступа к Grafana
-echo "Получение URL сервиса Grafana..."
+# Получение URL для доступа к ngrok
+sleep 5
+ngrok_url=$(curl -s http://localhost:4040/api/tunnels | grep -o "https://[a-z0-9]*.ngrok.io")
+echo "Приложение доступно по адресу $ngrok_url"
+
+# Получение URL Grafana
+echo "Получение URL для Grafana..."
 grafana_url=$(minikube service grafana --url -n monitoring)
 echo "Grafana доступна по адресу $grafana_url"
-echo "Войти в Grafana можно с логином admin и паролем admin."
+echo "Логин: admin, Пароль: admin"
 
-# Шаг 13: Добавление Prometheus и Loki как источников данных в Grafana
-echo "Добавление Prometheus и Loki как источников данных в Grafana..."
-
-# Добавляем Prometheus как источник данных
+# Настройка источников данных в Grafana для Prometheus и Loki
+echo "Настройка источников данных в Grafana..."
 curl -X POST "$grafana_url/api/datasources" \
     -H "Content-Type: application/json" \
     -d '{
@@ -86,7 +83,6 @@ curl -X POST "$grafana_url/api/datasources" \
         }' \
     -u admin:admin
 
-# Добавляем Loki как источник данных
 curl -X POST "$grafana_url/api/datasources" \
     -H "Content-Type: application/json" \
     -d '{
@@ -97,10 +93,8 @@ curl -X POST "$grafana_url/api/datasources" \
         }' \
     -u admin:admin
 
-# Шаг 14: Загрузка готовых дашбордов для Kubernetes, Loki и Docker
-echo "Добавление готовых дашбордов для Kubernetes, Loki и Docker..."
-
-# Добавление дашборда для мониторинга Kubernetes Nodes (ID: 3119)
+# Добавление дашбордов для мониторинга в Grafana
+echo "Добавление дашбордов для мониторинга в Grafana..."
 curl -X POST "$grafana_url/api/dashboards/import" \
     -H "Content-Type: application/json" \
     -d '{
@@ -110,8 +104,6 @@ curl -X POST "$grafana_url/api/dashboards/import" \
           "overwrite": true
         }' \
     -u admin:admin
-
-# Добавление дашборда для мониторинга Kubernetes Pods (ID: 3131)
 curl -X POST "$grafana_url/api/dashboards/import" \
     -H "Content-Type: application/json" \
     -d '{
@@ -121,11 +113,18 @@ curl -X POST "$grafana_url/api/dashboards/import" \
           "overwrite": true
         }' \
     -u admin:admin
-
-# Добавление дашборда для мониторинга Docker и контейнеров (ID: 179)
 curl -X POST "$grafana_url/api/dashboards/import" \
     -H "Content-Type: application/json" \
     -d '{
           "dashboard": {
             "id": 179
-         
+          },
+          "overwrite": true
+        }' \
+    -u admin:admin
+
+# Запуск Ansible playbook для мониторинга
+echo "Запуск Ansible playbook для настройки мониторинга..."
+ansible-playbook monitoring_playbook.yml
+
+echo "Развёртывание завершено."
