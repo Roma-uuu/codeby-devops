@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         DOCKER_HUB_REPO = 'apkerigz/devops'
-        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
     }
 
@@ -47,42 +46,13 @@ pipeline {
             }
         }
 
-        stage('Deploy Helm Chart') {
-            steps {
-                dir('exam/src/mychart') {
-                    script {
-                        echo "Deploying Helm chart with image tag: ${appVersion}"
-                        withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
-                            sh '''
-                            helm upgrade --install petclinic-app . \
-                            --set image.repository=$DOCKER_HUB_REPO \
-                            --set image.tag=${appVersion} \
-                            --kubeconfig=$KUBECONFIG \
-                            --set serviceAccount.token=$K8S_TOKEN
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Install Required Ansible Collections') {
-            steps {
-                // Установка коллекций kubernetes.core и community.general
-                sh 'ansible-galaxy collection install kubernetes.core'
-                sh 'ansible-galaxy collection install community.general'
-            }
-        }
-
-        stage('Deploy Monitoring Stack via Ansible') {
+        stage('Deploy Application to Minikube') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
-                        sh '''
-                        ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
-                        --extra-vars "ansible_become_pass=$BECOME_PASSWORD"
-                        '''
-                    }
+                    sh '''
+                    kubectl create deployment petclinic --image=$DOCKER_HUB_REPO:${appVersion} --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl expose deployment petclinic --type=NodePort --port=8080 --target-port=8080 --name=petclinic-service
+                    '''
                 }
             }
         }
@@ -99,24 +69,6 @@ pipeline {
                         '''
                         def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
                         echo "Access the application at: ${publicUrl}"
-                    }
-                }
-            }
-        }
-
-        stage('Check Service Availability') {
-            steps {
-                script {
-                    def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
-                    def services = [
-                        ['name': 'Grafana', 'url': "http://${nodeIp}:32000"],
-                        ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"],
-                        ['name': 'Petclinic Application', 'url': "http://${nodeIp}:30000"]
-                    ]
-
-                    for (service in services) {
-                        echo "Checking ${service.name} availability..."
-                        sh "curl --fail --connect-timeout 5 ${service.url} || echo '${service.name} is not available'"
                     }
                 }
             }
