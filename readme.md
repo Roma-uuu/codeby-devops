@@ -1,6 +1,3 @@
-
-Вот обновленный README.md, который включает информацию о использовании Helm, Jenkins Pipeline и Ansible для автоматического развёртывания и мониторинга приложения.
-
 Spring PetClinic Sample Application
 Это проект демонстрационного приложения Spring PetClinic с использованием Spring Boot, развертываемого в Minikube с помощью Helm, автоматизированного пайплайна в Jenkins и доступного в интернете через ngrok.
 
