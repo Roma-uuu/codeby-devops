@@ -1,73 +1,134 @@
----
-- hosts: localhost
-  tasks:
-    - name: Ensure kubernetes.core collection is installed
-      ansible.builtin.ansible_galaxy:
-        name: kubernetes.core
-        state: present
+pipeline {
+    agent any
 
-    - name: Add Helm repository for Prometheus
-      community.kubernetes.helm_repository:
-        name: prometheus-community
-        repo_url: https://prometheus-community.github.io/helm-charts
+    environment {
+        appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
+        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
+    }
 
-    - name: Add Helm repository for Grafana and Loki
-      community.kubernetes.helm_repository:
-        name: grafana
-        repo_url: https://grafana.github.io/helm-charts
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
 
-    - name: Update Helm repositories
-      ansible.builtin.command: helm repo update
+        stage('Checkout') {
+            steps {
+                retry(3) {
+                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
+                }
+            }
+        }
 
-    - name: Install Prometheus for monitoring pods and nodes
-      community.kubernetes.helm:
-        chart_ref: prometheus-community/kube-prometheus-stack
-        release_name: prometheus
-        namespace: monitoring
-        create_namespace: true
+        stage('Build Application') {
+            steps {
+                dir('exam/src') {
+                    sh 'mvn clean package -Dcheckstyle.skip=true'
+                }
+            }
+        }
 
-    - name: Install Loki and Promtail for collecting logs
-      community.kubernetes.helm:
-        chart_ref: grafana/loki-stack
-        release_name: loki
-        namespace: monitoring
-        values:
-          promtail:
-            enabled: true
-            config:
-              snippets: {}
+        stage('Build and Push Docker Image') {
+            steps {
+                dir('exam/src') {
+                    script {
+                        echo "Building Docker image with tag: ${appVersion}"
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                            retry(3) {
+                                sh """
+                                echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                                docker build -t apkerigz/devops:${appVersion} .
+                                docker push apkerigz/devops:${appVersion}
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-    - name: Install Grafana
-      community.kubernetes.helm:
-        chart_ref: grafana/grafana
-        release_name: grafana
-        namespace: monitoring
-        values:
-          adminPassword: 'admin'
+        stage('Deploy Helm Chart') {
+            steps {
+                dir('exam/src/mychart') {
+                    script {
+                        echo "Deploying Helm chart with image tag: ${appVersion}"
+                        withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                            sh """
+                            helm upgrade --install petclinic-app . \
+                            --set image.repository=apkerigz/devops \
+                            --set image.tag=${appVersion} \
+                            --kubeconfig=${KUBECONFIG} \
+                            --set serviceAccount.token=${K8S_TOKEN}
+                            """
+                        }
+                    }
+                }
+            }
+        }
 
-    - name: Wait for Grafana pod to be ready
-      kubernetes.core.k8s_info:
-        kind: Pod
-        namespace: monitoring
-        labels:
-          app.kubernetes.io/name: grafana
-      register: grafana_pods
+        stage('Install Required Ansible Collections') {
+            steps {
+                sh 'ansible-galaxy collection install kubernetes.core'
+            }
+        }
 
-    - name: Wait for 30 seconds to ensure Grafana service is available
-      ansible.builtin.pause:
-        seconds: 30
+        stage('Deploy Monitoring Stack via Ansible') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
+                        sh '''
+                        ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
+                        --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
+                        '''
+                    }
+                }
+            }
+        }
 
-    - name: Forward Grafana port
-      ansible.builtin.command: kubectl port-forward svc/grafana 3000:80 -n monitoring
-      async: 600
-      poll: 0
-      register: port_forward_result
+        stage('Expose Application via Ngrok') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'ngrok_authtoken', variable: 'NGROK_AUTHTOKEN')]) {
+                        def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
+                        sh """
+                        echo "Setting up Ngrok..."
+                        ngrok authtoken ${NGROK_AUTHTOKEN}
+                        ngrok http ${nodeIp}:30000 --log=stdout > ngrok.log &
+                        sleep 5
+                        """
+                        def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
+                        echo "Access the application at: ${publicUrl}"
+                    }
+                }
+            }
+        }
 
-    - name: Get Grafana session cookies for authentication
-      uri:
-        url: "http://localhost:3000/login"
-        method: POST
-        body: "user=admin&password=admin"
-        body_format: form-urlencoded
-        return_content: yes
-      register: grafana_login
+        stage('Test Service Availability') {
+            steps {
+                script {
+                    def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
+
+                    def services = [
+                        ['name': 'Grafana', 'url': "http://${nodeIp}:32000"],
+                        ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"]
+                    ]
+
+                    for (service in services) {
+                        echo "Checking ${service.name} availability..."
+                        sh "curl --fail --connect-timeout 5 ${service.url} || echo '${service.name} is not available'"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline finished successfully!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
