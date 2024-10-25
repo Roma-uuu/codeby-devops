@@ -2,86 +2,118 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'your-docker-hub-repo'
-        KUBECONFIG = '/path/to/.kube/config'
-        NGROK_AUTHTOKEN = credentials('ngrok_authtoken')
-        BECOME_PASSWORD = credentials('ansible_become_password')
+        appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
+        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
     }
 
     stages {
-        stage('Cleanup') {
+        stage('Clean Workspace') {
             steps {
-                script {
-                    echo "Cleaning up old resources..."
-                    sh '''
-                    helm uninstall monitoring-stack --namespace monitoring || true
-                    kubectl delete namespace monitoring || true
-                    '''
+                cleanWs()
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                retry(3) {
+                    git branch: 'exam', url: 'https://github.com/Roma-uuu/codeby-devops.git'
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Application') {
             steps {
-                script {
-                    docker.build("${DOCKER_HUB_REPO}:latest")
+                dir('exam/src') {
+                    sh 'mvn clean package -Dcheckstyle.skip=true'
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Build and Push Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker') {
-                        docker.image("${DOCKER_HUB_REPO}:latest").push()
+                dir('exam/src') {
+                    script {
+                        echo "Building Docker image with tag: ${appVersion}"
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                            retry(3) {
+                                sh """
+                                echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                                docker build -t apkerigz/devops:${appVersion} .
+                                docker push apkerigz/devops:${appVersion}
+                                """
+                            }
+                        }
                     }
                 }
             }
         }
 
-        stage('Cache Docker Images') {
+        stage('Deploy Helm Chart') {
             steps {
-                script {
-                    sh '''
-                    echo "Caching Docker images..."
-                    minikube image load quay.io/prometheus/prometheus:v2.54.1
-                    minikube image load grafana/grafana:11.2.2-security-01
-                    '''
+                dir('exam/src/mychart') {
+                    script {
+                        echo "Deploying Helm chart with image tag: ${appVersion}"
+                        withCredentials([string(credentialsId: 'k8s-sa-token', variable: 'K8S_TOKEN')]) {
+                            sh """
+                            helm upgrade --install petclinic-app . \
+                            --set image.repository=apkerigz/devops \
+                            --set image.tag=${appVersion} \
+                            --kubeconfig=${KUBECONFIG} \
+                            --set serviceAccount.token=${K8S_TOKEN}
+                            """
+                        }
+                    }
                 }
             }
         }
 
-        stage('Install Monitoring Stack with Ansible') {
+        stage('Install Required Ansible Collections') {
+            steps {
+                sh 'ansible-galaxy collection install kubernetes.core'
+            }
+        }
+
+        stage('Deploy Monitoring Stack via Ansible') {
             steps {
                 script {
-                    sh 'ansible-playbook -i /path/to/inventory /path/to/monitoring_playbook.yml --extra-vars "ansible_become_pass=$BECOME_PASSWORD"'
+                    withCredentials([string(credentialsId: 'for_ansible', variable: 'BECOME_PASSWORD')]) {
+                        sh '''
+                        ansible-playbook -i /home/rsshabanov/codeby-devops/exam/src/inventory /home/rsshabanov/codeby-devops/exam/src/monitoring_playbook.yml \
+                        --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
+                        '''
+                    }
                 }
             }
         }
 
-        stage('Start Ngrok Tunnel for Grafana') {
+        stage('Expose Application via Ngrok') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'ngrok_authtoken', variable: 'NGROK_AUTHTOKEN')]) {
+                        def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
+                        sh """
+                        echo "Setting up Ngrok..."
+                        ngrok authtoken ${NGROK_AUTHTOKEN}
+                        ngrok http ${nodeIp}:30000 --log=stdout > ngrok.log &
+                        sleep 5
+                        """
+                        def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
+                        echo "Access the application at: ${publicUrl}"
+                    }
+                }
+            }
+        }
+
+        stage('Test Service Availability') {
             steps {
                 script {
                     def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
-                    sh '''
-                    ngrok authtoken ${NGROK_AUTHTOKEN}
-                    ngrok http ${nodeIp}:32000 --log=stdout > ngrok.log &
-                    sleep 5
-                    '''
-                    def publicUrl = sh(returnStdout: true, script: "curl --silent http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'").trim()
-                    echo "Access Grafana at: ${publicUrl}"
-                }
-            }
-        }
 
-        stage('Check Service Availability') {
-            steps {
-                script {
-                    def nodeIp = sh(returnStdout: true, script: "minikube ip").trim()
                     def services = [
                         ['name': 'Grafana', 'url': "http://${nodeIp}:32000"],
                         ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"]
                     ]
+
                     for (service in services) {
                         echo "Checking ${service.name} availability..."
                         sh "curl --fail --connect-timeout 5 ${service.url} || echo '${service.name} is not available'"
@@ -93,7 +125,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Pipeline finished successfully!'
         }
         failure {
             echo 'Pipeline failed.'
