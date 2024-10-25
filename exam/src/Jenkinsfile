@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB_REPO = 'apkerigz/devops'
         appVersion = readFile('/home/rsshabanov/codeby-devops/exam/src/VERSION').trim()
+        KUBECONFIG = '/home/rsshabanov/codeby-devops/exam/src/kubeconfig-jenkins.yaml'
     }
 
     stages {
@@ -50,6 +51,7 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    export KUBECONFIG=${KUBECONFIG}
                     kubectl create deployment petclinic --image=$DOCKER_HUB_REPO:${appVersion} --dry-run=client -o yaml | kubectl apply -f -
                     kubectl expose deployment petclinic --type=NodePort --port=8080 --target-port=8080 --name=petclinic-service
                     '''
