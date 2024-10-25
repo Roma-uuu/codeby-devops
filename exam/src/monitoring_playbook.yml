@@ -1,6 +1,11 @@
 ---
 - hosts: localhost
   tasks:
+    - name: Ensure kubernetes.core collection is installed
+      ansible.builtin.ansible_galaxy:
+        name: kubernetes.core
+        state: present
+
     - name: Add Helm repository for Prometheus
       community.kubernetes.helm_repository:
         name: prometheus-community
