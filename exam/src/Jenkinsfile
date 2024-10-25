@@ -69,7 +69,9 @@ pipeline {
 
         stage('Install Required Ansible Collections') {
             steps {
+                // Установка коллекций kubernetes.core и community.general
                 sh 'ansible-galaxy collection install kubernetes.core'
+                sh 'ansible-galaxy collection install community.general'
             }
         }
 
@@ -82,6 +84,27 @@ pipeline {
                         --extra-vars "ansible_become_pass=${BECOME_PASSWORD}"
                         '''
                     }
+                }
+            }
+        }
+
+        stage('Port Forwarding for Local Access') {
+            steps {
+                script {
+                    sh '''
+                    echo "Starting port-forwarding for local access..."
+
+                    # Проброс порта для Grafana
+                    kubectl port-forward svc/grafana 32000:80 -n monitoring &
+                    
+                    # Проброс порта для Prometheus
+                    kubectl port-forward svc/prometheus 30900:9090 -n monitoring &
+
+                    # Проброс порта для приложения
+                    kubectl port-forward svc/petclinic-service 30000:8080 -n default &
+                    
+                    sleep 5
+                    '''
                 }
             }
         }
@@ -111,7 +134,8 @@ pipeline {
 
                     def services = [
                         ['name': 'Grafana', 'url': "http://${nodeIp}:32000"],
-                        ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"]
+                        ['name': 'Prometheus', 'url': "http://${nodeIp}:30900"],
+                        ['name': 'Petclinic Application', 'url': "http://${nodeIp}:30000"]
                     ]
 
                     for (service in services) {
