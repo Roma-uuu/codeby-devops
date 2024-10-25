@@ -1,48 +1,64 @@
 ---
-- name: Install monitoring stack on Kubernetes
-  hosts: localhost
+- hosts: localhost
+  become: true
   tasks:
     - name: Add Helm repository for Prometheus
       community.general.helm_repository:
         name: prometheus-community
         repo_url: https://prometheus-community.github.io/helm-charts
+        state: present
 
     - name: Add Helm repository for Grafana
       community.general.helm_repository:
         name: grafana
         repo_url: https://grafana.github.io/helm-charts
+        state: present
 
     - name: Update Helm repositories
-      command: helm repo update
-
-    - name: Install Prometheus
       community.general.helm:
-        name: prometheus
-        chart_ref: prometheus-community/prometheus
+        command: repo update
+
+    - name: Install Prometheus using Helm
+      community.general.helm:
+        name: kube-prometheus-stack
+        chart: prometheus-community/kube-prometheus-stack
+        release: prometheus
         namespace: monitoring
         create_namespace: true
-        release_state: present
 
-    - name: Install Grafana
+    - name: Install Grafana using Helm
       community.general.helm:
         name: grafana
-        chart_ref: grafana/grafana
+        chart: grafana/grafana
+        release: grafana
         namespace: monitoring
-        release_state: present
-        set:
-          - adminPassword=admin
-          - service.type=NodePort
-          - service.nodePort=32000
+        create_namespace: true
+        values:
+          - adminPassword: "admin"
+          - service:
+              type: NodePort
+              nodePort: 32000
 
-    - name: Wait for Grafana pod to be ready
+    - name: Wait for Grafana to be ready
       community.kubernetes.k8s_info:
         api_version: v1
         kind: Pod
         namespace: monitoring
-        labels:
-          app.kubernetes.io/name: grafana
+        label_selectors:
+          - app.kubernetes.io/name=grafana
       register: grafana_pods
 
-    - name: Wait for Grafana to be fully ready
-      pause:
-        seconds: 15
+    - name: Wait for Grafana pod to be ready
+      community.kubernetes.k8s:
+        state: present
+        wait: yes
+        name: "{{ item.metadata.name }}"
+        namespace: monitoring
+      with_items: "{{ grafana_pods.resources }}"
+      until: item.status.phase == "Running"
+      retries: 10
+      delay: 15
+
+    - name: Forward Grafana port
+      community.kubernetes.kubectl:
+        command: "port-forward svc/grafana 32000:80 --namespace monitoring"
