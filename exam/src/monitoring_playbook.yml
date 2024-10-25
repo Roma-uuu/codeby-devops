@@ -53,8 +53,7 @@
       kubernetes.core.k8s_info:
         kind: Pod
         namespace: monitoring
-        labels:
-          app.kubernetes.io/name: grafana
+        label_selectors: app.kubernetes.io/name=grafana
       register: grafana_pods
 
     - name: Wait for 30 seconds to ensure Grafana service is available
