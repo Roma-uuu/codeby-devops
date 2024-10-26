@@ -1,27 +1,0 @@
-Script started on 2024-07-01 21:47:42+03:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="120" LINES="30"]
-[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ java -version
-[?2004ljava version "17.0.11" 2024-04-16 LTS
-Java(TM) SE Runtime Environment (build 17.0.11+7-LTS-207)
-Java HotSpot(TM) 64-Bit Server VM (build 17.0.11+7-LTS-207, mixed mode, sharing)
-[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ sudo update-alternativew[K[Ks[Kes --config java
-[?2004l[sudo] password for rsshabanov: 
-There are 2 choices for the alternative java (providing /usr/bin/java).
-
-  Selection    Path                                         Priority   Status
-------------------------------------------------------------
-* 0            /usr/lib/jvm/jdk-17-oracle/bin/java           2         auto mode
-  1            /usr/lib/jvm/java-11-openjdk-amd64/bin/java   1         manual mode
-  2            /usr/lib/jvm/jdk-17-oracle/bin/java           2         manual mode
-
-Press <enter> to keep the current choice[*], or type selection number: 1
-update-alternatives: using /usr/lib/jvm/java-11-openjdk-amd64/bin/java to provide /usr/bin/java (java) in manual mode
-[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ sudo update-alternatives --config java[25Pjava -version
-[?2004lopenjdk version "11.0.23" 2024-04-16
-OpenJDK Runtime Environment (build 11.0.23+9-post-Ubuntu-1ubuntu122.04.1)
-OpenJDK 64-Bit Server VM (build 11.0.23+9-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
-[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ учше
-[?2004lbash: учше: command not found
-[?2004h]0;rsshabanov@MSK-01: ~/codeby-devops/lesson4[01;32mrsshabanov@MSK-01[00m:[01;34m~/codeby-devops/lesson4[00m$ exitr[K
-[?2004lexit
-
-Script done on 2024-07-01 21:48:44+03:00 [COMMAND_EXIT_CODE="127"]

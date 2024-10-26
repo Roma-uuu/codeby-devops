@@ -1,0 +1,12 @@
+replicaCount: 2
+
+appName: petclinic
+
+image:
+  repository: apkerigz/devops
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: NodePort
+  port: 8080
